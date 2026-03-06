@@ -2,16 +2,13 @@
   "name": "philips-remote",
   "version": "1.0.0",
   "description": "Веб-пульт для телевізора Philips Smart TV (JointSpace API v1).",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zloi2ff/philips-remote.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["philips", "tv", "remote", "jointspace"],
+  "author": "zloi2ff",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {

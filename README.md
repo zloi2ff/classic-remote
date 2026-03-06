@@ -21,6 +21,8 @@ Web-based remote control for Philips Smart TV (JointSpace API v1). Available as 
 
 ## Features
 
+- Auto-discovery of Philips TVs on local network
+- Manual TV IP configuration
 - Power on/off
 - Navigation (arrows, OK, Back, Home)
 - Volume control (+/-, mute, slider)
@@ -29,7 +31,6 @@ Web-based remote control for Philips Smart TV (JointSpace API v1). Available as 
 - Playback controls (play, pause, stop, rewind, forward)
 - Quick source switching (TV, HDMI, Blu-ray, etc.)
 - Visual button feedback with haptic (iOS)
-- Configurable server IP address in app
 - PWA support (add to home screen on iOS/Android)
 - Native iOS app (Capacitor)
 
@@ -43,25 +44,21 @@ cd philips-remote
 python3 server.py
 ```
 
-Open http://localhost:8888 in your browser.
+Open http://localhost:8888 in your browser. The app will prompt you to scan the network or enter your TV's IP address.
 
 ### Configuration
 
-Edit `server.py` to change TV IP address:
-
-```python
-TV_IP = "192.168.31.214"  # Your TV IP
-TV_PORT = 1925
-SERVER_PORT = 8888
-```
-
-### Auto-start (Linux systemd)
+The server can be configured via environment variables:
 
 ```bash
-sudo cp philips-remote.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable philips-remote
-sudo systemctl start philips-remote
+# Set TV IP (optional — can be configured from the web UI)
+TV_IP=192.168.1.100 python3 server.py
+
+# Change server port
+SERVER_PORT=9000 python3 server.py
+
+# Set TV port (default: 1925)
+TV_PORT=1925 python3 server.py
 ```
 
 ## Usage on iPhone/Android
@@ -92,11 +89,6 @@ In Xcode:
 2. Configure signing (Signing & Capabilities → Team)
 3. Press Run (Cmd+R)
 
-**Configure server IP in the app:**
-- Tap the gear icon (top right)
-- Enter your Mac's IP address and port (8888)
-- Save
-
 ## API Reference
 
 The TV uses JointSpace API v1:
@@ -108,6 +100,14 @@ The TV uses JointSpace API v1:
 | `/1/sources` | GET | Available sources |
 | `/1/sources/current` | POST | Switch source |
 | `/1/input/key` | POST | Send remote key |
+
+### Server Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/discover` | GET | Scan local network for Philips TVs |
+| `/config` | GET | Get current TV IP configuration |
+| `/config` | POST | Set TV IP (`{"ip": "...", "port": ...}`) |
 
 ### Key codes
 

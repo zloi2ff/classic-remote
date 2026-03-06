@@ -2,13 +2,19 @@ __pycache__/
 *.pyc
 .DS_Store
 
+# Environment
+.env
+.env.*
+.env.local
+
 # Node
 node_modules/
 
 # iOS build artifacts
 ios/App/build/
 ios/App/Pods/
+ios/App/ExportOptions.plist
 *.ipa
 
-# Capacitor
+# Claude
 .claude/

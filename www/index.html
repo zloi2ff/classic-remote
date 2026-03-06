@@ -6,7 +6,7 @@
     <title>Philips Remote</title>
 
     <!-- PWA / iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Remote">
     <meta name="theme-color" content="#000000">
@@ -24,7 +24,6 @@
             width: 100%;
             height: 100%;
             overscroll-behavior: none;
-            -webkit-overflow-scrolling: auto;
             touch-action: manipulation;
             background: #000000;
         }
@@ -55,7 +54,6 @@
 
         .page.expanded {
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             justify-content: flex-start;
             padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
         }
@@ -107,6 +105,7 @@
 
         .status.connected { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
         .status.error { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+        .status.scanning { background: rgba(52, 152, 219, 0.15); color: #3498db; }
 
         /* Buttons */
         .btn {
@@ -431,8 +430,10 @@
             border-radius: 16px;
             padding: 24px;
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             border: 1px solid rgba(255,255,255,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal h2 {
@@ -479,9 +480,234 @@
             background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
             border: none;
         }
+
+        /* Discovery */
+        .discover-btn {
+            width: 100%;
+            height: 44px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .discover-btn:active {
+            transform: scale(0.97);
+        }
+
+        .discover-btn:disabled {
+            opacity: 0.5;
+        }
+
+        .tv-list {
+            margin-bottom: 16px;
+        }
+
+        .tv-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #12121a;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tv-item:active {
+            transform: scale(0.97);
+            border-color: #3498db;
+        }
+
+        .tv-item.selected {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.08);
+        }
+
+        .tv-item-info {
+            flex: 1;
+        }
+
+        .tv-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .tv-item-ip {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .tv-item-check {
+            color: #2ecc71;
+            font-size: 18px;
+            display: none;
+        }
+
+        .tv-item.selected .tv-item-check {
+            display: block;
+        }
+
+        .divider {
+            text-align: center;
+            color: #555;
+            font-size: 11px;
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .current-tv {
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 16px;
+            padding: 8px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+        }
+
+        .current-tv strong {
+            color: #2ecc71;
+        }
+
+        /* Setup screen */
+        .setup-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            z-index: 900;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .setup-screen.active {
+            display: flex;
+        }
+
+        .setup-screen h1 {
+            font-size: 22px;
+            margin: 0 0 8px 0;
+        }
+
+        .setup-screen p {
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+            margin: 0 0 30px 0;
+        }
+
+        .setup-screen .discover-btn {
+            width: 100%;
+            max-width: 280px;
+            height: 50px;
+            font-size: 16px;
+        }
+
+        .setup-screen .divider {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .setup-manual {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .setup-manual input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #1a1a28;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 12px;
+            outline: none;
+            text-align: center;
+        }
+
+        .setup-manual input:focus {
+            border-color: #3498db;
+        }
+
+        .setup-manual .btn.primary {
+            width: 100%;
+            height: 44px;
+            font-size: 14px;
+            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+            border: none;
+            border-radius: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
     </style>
 </head>
 <body>
+    <!-- Setup Screen (shown when no TV configured) -->
+    <div class="setup-screen" id="setupScreen">
+        <h1>Philips Remote</h1>
+        <p>Find your TV on the network or enter IP manually</p>
+
+        <button class="discover-btn" id="setupScanBtn" onclick="startDiscovery('setup')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
+            </svg>
+            Scan Network
+        </button>
+
+        <div class="tv-list" id="setupTvList"></div>
+
+        <div class="divider">or enter manually</div>
+
+        <div class="setup-manual">
+            <input type="text" id="setupIpInput" placeholder="192.168.1.100" inputmode="decimal">
+            <button class="btn primary" onclick="manualConnect('setup')">Connect</button>
+        </div>
+    </div>
+
+    <!-- Main Remote -->
     <div class="page active" id="tvPage">
         <div class="main-content">
             <div class="top-header">
@@ -491,7 +717,7 @@
                     </svg>
                 </button>
                 <div class="header-center">
-                    <h1>PHILIPS 6158</h1>
+                    <h1 id="tvTitle">PHILIPS TV</h1>
                     <div id="tvStatus" class="status connected">Connected</div>
                 </div>
                 <button class="btn settings" onclick="openSettings()">
@@ -602,49 +828,159 @@
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <h2>Settings</h2>
-            <label>Server IP Address</label>
-            <input type="text" id="serverIpInput" placeholder="192.168.1.100">
-            <label>Port</label>
-            <input type="text" id="serverPortInput" placeholder="8888">
+
+            <div id="currentTvInfo" class="current-tv" style="display:none;"></div>
+
+            <button class="discover-btn" id="modalScanBtn" onclick="startDiscovery('modal')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                    <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
+                </svg>
+                Scan Network
+            </button>
+
+            <div class="tv-list" id="modalTvList"></div>
+
+            <div class="divider">or enter TV IP manually</div>
+
+            <label>TV IP Address</label>
+            <input type="text" id="manualIpInput" placeholder="192.168.1.100" inputmode="decimal">
+
             <div class="modal-buttons">
                 <button class="btn" onclick="closeSettings()">Cancel</button>
-                <button class="btn primary" onclick="saveSettings()">Save</button>
+                <button class="btn primary" onclick="manualConnect('modal')">Connect</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Default server settings
-        const DEFAULT_IP = '192.168.31.115';
-        const DEFAULT_PORT = '8888';
+        const VOLUME_POLL_INTERVAL = 10000; // ms
+        let pollTimer = null;
 
-        // Check if running on the same server (not file:// or different host)
-        function isLocalServer() {
-            return window.location.protocol !== 'file:' &&
-                   window.location.port === DEFAULT_PORT;
-        }
-
-        // Load settings from localStorage
+        // Server URL (for iOS app connecting to remote server)
         function getServerUrl() {
-            // If running on the proxy server, use relative paths
-            if (isLocalServer()) {
-                return '';
-            }
-            const ip = localStorage.getItem('serverIp') || DEFAULT_IP;
-            const port = localStorage.getItem('serverPort') || DEFAULT_PORT;
-            return `http://${ip}:${port}`;
+            if (window.location.protocol !== 'file:') return '';
+            const ip = localStorage.getItem('serverIp');
+            const port = localStorage.getItem('serverPort') || '8888';
+            return ip ? `http://${ip}:${port}` : '';
         }
 
         function getApiBase() {
             return `${getServerUrl()}/api/1`;
         }
 
-        // Settings modal functions
-        function openSettings() {
-            const ip = localStorage.getItem('serverIp') || DEFAULT_IP;
-            const port = localStorage.getItem('serverPort') || DEFAULT_PORT;
-            document.getElementById('serverIpInput').value = ip;
-            document.getElementById('serverPortInput').value = port;
+        // --- TV Discovery & Configuration ---
+
+        async function loadConfig() {
+            try {
+                const res = await fetch(`${getServerUrl()}/config`);
+                if (!res.ok) return null;
+                return await res.json();
+            } catch {
+                return null;
+            }
+        }
+
+        async function saveConfig(ip, port) {
+            try {
+                await fetch(`${getServerUrl()}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, port: port || 1925 })
+                });
+            } catch {}
+        }
+
+        async function startDiscovery(context) {
+            const btnId = context === 'setup' ? 'setupScanBtn' : 'modalScanBtn';
+            const listId = context === 'setup' ? 'setupTvList' : 'modalTvList';
+            const btn = document.getElementById(btnId);
+            const list = document.getElementById(listId);
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Scanning...';
+            list.innerHTML = '';
+
+            try {
+                const res = await fetch(`${getServerUrl()}/discover`);
+                const data = await res.json();
+
+                if (data.tvs && data.tvs.length > 0) {
+                    list.innerHTML = data.tvs.map(tv => `
+                        <div class="tv-item" onclick="selectTv('${tv.ip}', ${tv.port}, '${tv.name}', this, '${context}')">
+                            <div class="tv-item-info">
+                                <div class="tv-item-name">${tv.name || 'Philips TV'}</div>
+                                <div class="tv-item-ip">${tv.ip}:${tv.port}${tv.model ? ' — ' + tv.model : ''}</div>
+                            </div>
+                            <div class="tv-item-check">✓</div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div style="text-align:center;color:#888;font-size:12px;padding:12px;">No TVs found on the network</div>';
+                }
+            } catch {
+                list.innerHTML = '<div style="text-align:center;color:#e74c3c;font-size:12px;padding:12px;">Scan failed</div>';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                    <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
+                </svg>
+                Scan Again`;
+        }
+
+        async function selectTv(ip, port, name, el, context) {
+            const listId = context === 'setup' ? 'setupTvList' : 'modalTvList';
+            document.querySelectorAll(`#${listId} .tv-item`).forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+
+            await saveConfig(ip, port);
+            localStorage.setItem('tvName', name || 'Philips TV');
+            document.getElementById('tvTitle').textContent = (name || 'PHILIPS TV').toUpperCase();
+
+            if (context === 'setup') {
+                document.getElementById('setupScreen').classList.remove('active');
+            } else {
+                closeSettings();
+            }
+
+            startPolling();
+        }
+
+        async function manualConnect(context) {
+            const inputId = context === 'setup' ? 'setupIpInput' : 'manualIpInput';
+            const ip = document.getElementById(inputId).value.trim();
+            if (!ip) return;
+
+            await saveConfig(ip, 1925);
+
+            if (context === 'setup') {
+                document.getElementById('setupScreen').classList.remove('active');
+            } else {
+                closeSettings();
+            }
+
+            startPolling();
+        }
+
+        // --- Settings Modal ---
+
+        async function openSettings() {
+            const config = await loadConfig();
+            const infoEl = document.getElementById('currentTvInfo');
+
+            if (config && config.ip) {
+                const name = localStorage.getItem('tvName') || 'Philips TV';
+                infoEl.innerHTML = `Connected to: <strong>${name}</strong> (${config.ip}:${config.port})`;
+                infoEl.style.display = 'block';
+            } else {
+                infoEl.style.display = 'none';
+            }
+
+            document.getElementById('modalTvList').innerHTML = '';
+            document.getElementById('manualIpInput').value = config ? config.ip : '';
             document.getElementById('settingsModal').classList.add('active');
         }
 
@@ -652,27 +988,18 @@
             document.getElementById('settingsModal').classList.remove('active');
         }
 
-        function saveSettings() {
-            const ip = document.getElementById('serverIpInput').value.trim();
-            const port = document.getElementById('serverPortInput').value.trim();
-            if (ip) {
-                localStorage.setItem('serverIp', ip);
-                localStorage.setItem('serverPort', port || DEFAULT_PORT);
-                closeSettings();
-                getVolume(); // Test connection
-            }
-        }
+        // --- Haptic feedback ---
 
-        // Haptic feedback using Capacitor
         function haptic() {
             try {
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
                     window.Capacitor.Plugins.Haptics.impact({ style: 'Light' });
                 }
-            } catch (e) {}
+            } catch {}
         }
 
-        // Visual + haptic feedback for button press
+        // --- Button feedback ---
+
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.btn').forEach(btn => {
                 btn.addEventListener('touchstart', function() {
@@ -684,6 +1011,8 @@
                 }, { passive: true });
             });
         });
+
+        // --- Remote Controls ---
 
         function toggleExpand(page) {
             const btn = document.getElementById(page + 'ExpandBtn');
@@ -701,15 +1030,11 @@
                 const response = await fetch(`${getApiBase()}/input/key`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: key })
+                    body: JSON.stringify({ key })
                 });
-                if (response.ok) {
-                    showStatus('connected', `${key}`);
-                } else {
-                    showStatus('error', `Error`);
-                }
-            } catch (error) {
-                showStatus('error', `Offline`);
+                showStatus(response.ok ? 'connected' : 'error', response.ok ? key : 'Error');
+            } catch {
+                showStatus('error', 'Offline');
             }
         }
 
@@ -722,7 +1047,7 @@
                     body: JSON.stringify({ current: parseInt(value), muted: false })
                 });
                 showStatus('connected', `Vol: ${value}`);
-            } catch (error) {
+            } catch {
                 showStatus('error', 'Offline');
             }
         }
@@ -732,10 +1057,10 @@
                 await fetch(`${getApiBase()}/sources/current`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id })
+                    body: JSON.stringify({ id })
                 });
-                showStatus('connected', `Source OK`);
-            } catch (error) {
+                showStatus('connected', 'Source OK');
+            } catch {
                 showStatus('error', 'Offline');
             }
         }
@@ -743,11 +1068,12 @@
         async function getVolume() {
             try {
                 const response = await fetch(`${getApiBase()}/audio/volume`);
+                if (!response.ok) throw new Error('Bad response');
                 const data = await response.json();
                 document.getElementById('volumeSlider').value = data.current;
                 document.getElementById('volumeValue').textContent = data.current;
-                showStatus('connected', `Connected`);
-            } catch (error) {
+                showStatus('connected', 'Connected');
+            } catch {
                 showStatus('error', 'Offline');
             }
         }
@@ -758,8 +1084,41 @@
             status.textContent = message;
         }
 
-        getVolume();
-        setInterval(getVolume, 10000);
+        // --- Polling with visibility awareness ---
+
+        function startPolling() {
+            getVolume();
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(getVolume, VOLUME_POLL_INTERVAL);
+        }
+
+        function stopPolling() {
+            if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                startPolling();
+            } else {
+                stopPolling();
+            }
+        });
+
+        // --- Init ---
+
+        (async function init() {
+            const config = await loadConfig();
+            if (config && config.ip) {
+                const name = localStorage.getItem('tvName');
+                if (name) document.getElementById('tvTitle').textContent = name.toUpperCase();
+                startPolling();
+            } else {
+                document.getElementById('setupScreen').classList.add('active');
+            }
+        })();
     </script>
 </body>
 </html>
