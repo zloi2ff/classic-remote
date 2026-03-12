@@ -1,5 +1,11 @@
 {
   "appId": "com.philips.remote",
   "appName": "Philips Remote",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "AdMob": {
+      "appId": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
+      "initializeForTesting": false
+    }
+  }
 }

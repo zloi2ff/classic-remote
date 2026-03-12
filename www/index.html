@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
@@ -12,7 +12,80 @@
     <meta name="theme-color" content="#000000">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
+
     <style>
+        /* ============================================================
+           THEME VARIABLES
+        ============================================================ */
+        :root {
+            --bg-primary:     #000000;
+            --bg-secondary:   #12121a;
+            --bg-tertiary:    #1a1a28;
+            --bg-card:        rgba(255,255,255,0.03);
+            --border:         rgba(255,255,255,0.08);
+            --border-subtle:  rgba(255,255,255,0.05);
+            --text-primary:   #ffffff;
+            --text-secondary: #888888;
+            --text-muted:     #555555;
+            --accent:         #3498db;
+            --accent-dark:    #2980b9;
+            --success:        #2ecc71;
+            --danger:         #e74c3c;
+            --yellow:         #f1c40f;
+            --green-dark:     #1e8449;
+            --btn-from:       #1a1a28;
+            --btn-to:         #12121a;
+            --settings-bg:    #0a0a12;
+            --settings-row:   #1a1a28;
+            --settings-sep:   rgba(255,255,255,0.06);
+            --overlay:        rgba(0,0,0,0.85);
+        }
+
+        [data-theme="light"] {
+            --bg-primary:     #f2f2f7;
+            --bg-secondary:   #ffffff;
+            --bg-tertiary:    #f2f2f7;
+            --bg-card:        rgba(0,0,0,0.03);
+            --border:         rgba(0,0,0,0.1);
+            --border-subtle:  rgba(0,0,0,0.05);
+            --text-primary:   #000000;
+            --text-secondary: #6c6c70;
+            --text-muted:     #aeaeb2;
+            --accent:         #007aff;
+            --accent-dark:    #0062cc;
+            --btn-from:       #e5e5ea;
+            --btn-to:         #d1d1d6;
+            --settings-bg:    #f2f2f7;
+            --settings-row:   #ffffff;
+            --settings-sep:   rgba(0,0,0,0.08);
+            --overlay:        rgba(0,0,0,0.5);
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-theme="system"] {
+                --bg-primary:     #f2f2f7;
+                --bg-secondary:   #ffffff;
+                --bg-tertiary:    #f2f2f7;
+                --bg-card:        rgba(0,0,0,0.03);
+                --border:         rgba(0,0,0,0.1);
+                --border-subtle:  rgba(0,0,0,0.05);
+                --text-primary:   #000000;
+                --text-secondary: #6c6c70;
+                --text-muted:     #aeaeb2;
+                --accent:         #007aff;
+                --accent-dark:    #0062cc;
+                --btn-from:       #e5e5ea;
+                --btn-to:         #d1d1d6;
+                --settings-bg:    #f2f2f7;
+                --settings-row:   #ffffff;
+                --settings-sep:   rgba(0,0,0,0.08);
+                --overlay:        rgba(0,0,0,0.5);
+            }
+        }
+
+        /* ============================================================
+           BASE
+        ============================================================ */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -25,17 +98,20 @@
             height: 100%;
             overscroll-behavior: none;
             touch-action: manipulation;
-            background: #000000;
+            background: var(--bg-primary);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000000;
             margin: 0;
             padding: 0;
-            color: white;
+            color: var(--text-primary);
+            transition: background 0.2s, color 0.2s;
         }
 
+        /* ============================================================
+           REMOTE PAGE
+        ============================================================ */
         .page {
             display: none;
             width: 100%;
@@ -46,11 +122,10 @@
             padding-top: calc(env(safe-area-inset-top, 10px) + 5px);
             flex-direction: column;
             justify-content: space-between;
+            background: var(--bg-primary);
         }
 
-        .page.active {
-            display: flex;
-        }
+        .page.active { display: flex; }
 
         .page.expanded {
             overflow-y: auto;
@@ -66,9 +141,7 @@
             gap: 0;
         }
 
-        .main-content > * {
-            margin-bottom: 0;
-        }
+        .main-content > * { margin-bottom: 0; }
 
         .page.expanded .main-content {
             flex: none;
@@ -91,7 +164,7 @@
         .header-center h1 {
             font-size: 13px;
             margin: 0 0 4px 0;
-            color: #555;
+            color: var(--text-muted);
             font-weight: 500;
             letter-spacing: 1px;
         }
@@ -103,16 +176,16 @@
             display: inline-block;
         }
 
-        .status.connected { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
-        .status.error { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
-        .status.scanning { background: rgba(52, 152, 219, 0.15); color: #3498db; }
+        .status.connected { background: rgba(46,204,113,0.15); color: var(--success); }
+        .status.error     { background: rgba(231,76,60,0.15);  color: var(--danger); }
+        .status.scanning  { background: rgba(52,152,219,0.15); color: var(--accent); }
 
         /* Buttons */
         .btn {
-            background: linear-gradient(180deg, #1a1a28 0%, #12121a 100%);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, var(--btn-from) 0%, var(--btn-to) 100%);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            color: white;
+            color: var(--text-primary);
             font-size: 13px;
             cursor: pointer;
             transition: all 0.1s;
@@ -124,33 +197,37 @@
         .btn:active,
         .btn.flash {
             transform: scale(0.92);
-            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%) !important;
+            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%) !important;
         }
 
         .btn.power {
             background: linear-gradient(180deg, #c0392b 0%, #962020 100%);
-            width: 44px;
-            height: 44px;
+            width: 44px; height: 44px;
             border-radius: 50%;
             border: none;
             flex-shrink: 0;
         }
 
         .btn.power:active {
-            background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+            background: linear-gradient(180deg, var(--danger) 0%, #c0392b 100%);
         }
 
-        /* Volume slider */
-        .volume-row {
-            margin-bottom: 12px;
+        .btn.settings-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
         }
+
+        /* Volume */
+        .volume-row { margin-bottom: 12px; }
 
         .volume-slider {
             flex: 1;
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255,255,255,0.02);
+            background: var(--bg-card);
             padding: 12px 15px;
             border-radius: 16px;
         }
@@ -159,31 +236,27 @@
             flex: 1;
             height: 6px;
             -webkit-appearance: none;
-            background: #1a1a28;
+            background: var(--bg-secondary);
             border-radius: 3px;
             outline: none;
         }
 
         .volume-slider input::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #3498db;
+            width: 24px; height: 24px;
+            background: var(--accent);
             border-radius: 50%;
             cursor: pointer;
         }
 
-        .volume-slider span {
-            color: #666;
-            font-size: 12px;
-        }
+        .volume-slider span { color: var(--text-secondary); font-size: 12px; }
 
         .volume-value {
             min-width: 24px;
             text-align: center;
             font-size: 13px;
             font-weight: 600;
-            color: #3498db;
+            color: var(--accent);
         }
 
         /* Navigation row */
@@ -193,11 +266,7 @@
             gap: 8px;
         }
 
-        .nav-row .btn {
-            height: 42px;
-            font-size: 12px;
-            font-weight: 500;
-        }
+        .nav-row .btn { height: 42px; font-size: 12px; font-weight: 500; }
 
         /* Main controls */
         .main-controls {
@@ -208,39 +277,20 @@
         }
 
         /* Side controls */
-        .side-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 52px;
-        }
+        .side-controls { display: flex; flex-direction: column; gap: 6px; width: 52px; }
 
-        .side-controls .btn {
-            width: 52px;
-            height: 48px;
-            font-size: 18px;
-            font-weight: 300;
-        }
-
-        .side-controls .btn.mute {
-            font-size: 10px;
-            font-weight: 500;
-        }
-
+        .side-controls .btn { width: 52px; height: 48px; font-size: 18px; font-weight: 300; }
+        .side-controls .btn.mute { font-size: 10px; font-weight: 500; }
         .side-controls .label {
             font-size: 8px;
-            color: #555;
+            color: var(--text-muted);
             text-transform: uppercase;
             text-align: center;
             margin-bottom: 2px;
         }
 
         /* D-pad */
-        .dpad-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
+        .dpad-container { flex: 1; display: flex; justify-content: center; }
 
         .dpad {
             display: grid;
@@ -249,44 +299,28 @@
             gap: 4px;
         }
 
-        .dpad .btn {
-            width: 58px;
-            height: 58px;
-            font-size: 20px;
-        }
+        .dpad .btn { width: 58px; height: 58px; font-size: 20px; }
 
         .dpad .btn.ok {
-            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
             border-radius: 50%;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 14px; font-weight: 600;
             border: none;
         }
 
-        .dpad .empty {
-            background: transparent;
-        }
+        .dpad .empty { background: transparent; }
 
         /* Action row */
-        .action-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .action-row .btn {
-            height: 42px;
-            font-size: 12px;
-            font-weight: 500;
-        }
+        .action-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .action-row .btn { height: 42px; font-size: 12px; font-weight: 500; }
 
         /* Expand button */
         .expand-btn {
             width: 100%;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
             border-radius: 12px;
-            color: #666;
+            color: var(--text-secondary);
             font-size: 11px;
             padding: 12px;
             cursor: pointer;
@@ -298,45 +332,19 @@
             flex-shrink: 0;
         }
 
-        .page.expanded .expand-btn {
-            margin-top: 12px;
-        }
-
-        .expand-btn:active {
-            background: rgba(255,255,255,0.06);
-        }
-
-        .expand-btn .arrow {
-            transition: transform 0.3s;
-            font-size: 10px;
-        }
-
-        .expand-btn.expanded .arrow {
-            transform: rotate(180deg);
-        }
+        .page.expanded .expand-btn { margin-top: 12px; }
+        .expand-btn:active { background: rgba(255,255,255,0.06); }
+        .expand-btn .arrow { transition: transform 0.3s; font-size: 10px; }
+        .expand-btn.expanded .arrow { transform: rotate(180deg); }
 
         /* Collapsible */
-        .collapsible {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .collapsible.expanded {
-            max-height: 700px;
-        }
-
-        .collapsible-content {
-            padding-top: 10px;
-        }
-
-        .section {
-            margin-bottom: 10px;
-        }
-
+        .collapsible { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .collapsible.expanded { max-height: 700px; }
+        .collapsible-content { padding-top: 10px; }
+        .section { margin-bottom: 10px; }
         .section-title {
             font-size: 8px;
-            color: #555;
+            color: var(--text-muted);
             text-transform: uppercase;
             margin-bottom: 6px;
             text-align: center;
@@ -344,142 +352,111 @@
         }
 
         /* Playback */
-        .playback-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-
-        .playback-row .btn {
-            height: 38px;
-            font-size: 13px;
-        }
-
-        .playback-row2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-        }
-
-        .playback-row2 .btn {
-            height: 34px;
-            font-size: 10px;
-        }
+        .playback-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px; }
+        .playback-row .btn { height: 38px; font-size: 13px; }
+        .playback-row2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .playback-row2 .btn { height: 34px; font-size: 10px; }
 
         /* Sources */
-        .sources {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-        }
-
-        .sources .btn {
-            font-size: 9px;
-            height: 34px;
-            padding: 4px;
-        }
+        .sources { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .sources .btn { font-size: 9px; height: 34px; padding: 4px; }
 
         /* Color buttons */
-        .color-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+        .color-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .color-row .btn { height: 32px; border: none; }
+        .btn.color-red    { background: linear-gradient(180deg, var(--danger) 0%, #c0392b 100%); }
+        .btn.color-green  { background: linear-gradient(180deg, #27ae60 0%, var(--green-dark) 100%); }
+        .btn.color-yellow { background: linear-gradient(180deg, var(--yellow) 0%, #d4ac0d 100%); }
+        .btn.color-blue   { background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%); }
+
+        /* ============================================================
+           SETUP SCREEN
+        ============================================================ */
+        .setup-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 900;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
         }
 
-        .color-row .btn {
-            height: 32px;
-            border: none;
+        .setup-screen.active { display: flex; }
+
+        .setup-screen h1 { font-size: 22px; margin: 0 0 8px 0; color: var(--text-primary); }
+        .setup-screen p { color: var(--text-secondary); font-size: 14px; text-align: center; margin: 0 0 30px 0; }
+
+        .setup-screen .discover-btn { width: 100%; max-width: 280px; height: 50px; font-size: 16px; }
+        .setup-screen .divider { width: 100%; max-width: 280px; }
+
+        .setup-manual { width: 100%; max-width: 280px; }
+
+        .setup-manual input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 12px;
+            outline: none;
+            text-align: center;
         }
 
-        .btn.color-red { background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%); }
-        .btn.color-green { background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%); }
-        .btn.color-yellow { background: linear-gradient(180deg, #f1c40f 0%, #d4ac0d 100%); }
-        .btn.color-blue { background: linear-gradient(180deg, #3498db 0%, #2980b9 100%); }
+        .setup-manual input:focus { border-color: var(--accent); }
+        .setup-manual .btn.primary { width: 100%; height: 44px; font-size: 14px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%); border: none; border-radius: 10px; }
 
-        /* Settings button */
-        .btn.settings {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* Modal */
+        /* ============================================================
+           TV DISCOVERY MODAL
+        ============================================================ */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.85);
+            inset: 0;
+            background: var(--overlay);
             z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
 
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
 
         .modal {
-            background: #1a1a28;
+            background: var(--bg-tertiary);
             border-radius: 16px;
             padding: 24px;
             width: 100%;
             max-width: 340px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             max-height: 80vh;
             overflow-y: auto;
         }
 
-        .modal h2 {
-            margin: 0 0 20px 0;
-            font-size: 18px;
-            text-align: center;
-        }
-
-        .modal label {
-            display: block;
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 6px;
-        }
+        .modal h2 { margin: 0 0 20px 0; font-size: 18px; text-align: center; color: var(--text-primary); }
+        .modal label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
 
         .modal input {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: #12121a;
-            color: white;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             font-size: 16px;
             margin-bottom: 16px;
             outline: none;
         }
 
-        .modal input:focus {
-            border-color: #3498db;
-        }
+        .modal input:focus { border-color: var(--accent); }
 
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .modal-buttons .btn {
-            flex: 1;
-            height: 44px;
-            font-size: 14px;
-        }
-
-        .modal-buttons .btn.primary {
-            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
-            border: none;
-        }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons .btn { flex: 1; height: 44px; font-size: 14px; }
+        .modal-buttons .btn.primary { background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%); border: none; }
 
         /* Discovery */
         .discover-btn {
@@ -487,10 +464,10 @@
             height: 44px;
             font-size: 14px;
             margin-bottom: 16px;
-            background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%);
+            background: linear-gradient(180deg, #27ae60 0%, var(--green-dark) 100%);
             border: none;
             border-radius: 10px;
-            color: white;
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -498,69 +475,35 @@
             gap: 8px;
         }
 
-        .discover-btn:active {
-            transform: scale(0.97);
-        }
+        .discover-btn:active { transform: scale(0.97); }
+        .discover-btn:disabled { opacity: 0.5; }
 
-        .discover-btn:disabled {
-            opacity: 0.5;
-        }
-
-        .tv-list {
-            margin-bottom: 16px;
-        }
+        .tv-list { margin-bottom: 16px; }
 
         .tv-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 12px;
-            background: #12121a;
+            background: var(--bg-secondary);
             border-radius: 10px;
             margin-bottom: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border-subtle);
             cursor: pointer;
             transition: all 0.15s;
         }
 
-        .tv-item:active {
-            transform: scale(0.97);
-            border-color: #3498db;
-        }
-
-        .tv-item.selected {
-            border-color: #2ecc71;
-            background: rgba(46, 204, 113, 0.08);
-        }
-
-        .tv-item-info {
-            flex: 1;
-        }
-
-        .tv-item-name {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
-
-        .tv-item-ip {
-            font-size: 11px;
-            color: #888;
-        }
-
-        .tv-item-check {
-            color: #2ecc71;
-            font-size: 18px;
-            display: none;
-        }
-
-        .tv-item.selected .tv-item-check {
-            display: block;
-        }
+        .tv-item:active { transform: scale(0.97); border-color: var(--accent); }
+        .tv-item.selected { border-color: var(--success); background: rgba(46,204,113,0.08); }
+        .tv-item-info { flex: 1; }
+        .tv-item-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; color: var(--text-primary); }
+        .tv-item-ip { font-size: 11px; color: var(--text-secondary); }
+        .tv-item-check { color: var(--success); font-size: 18px; display: none; }
+        .tv-item.selected .tv-item-check { display: block; }
 
         .divider {
             text-align: center;
-            color: #555;
+            color: var(--text-muted);
             font-size: 11px;
             margin: 16px 0;
             position: relative;
@@ -573,7 +516,7 @@
             top: 50%;
             width: 35%;
             height: 1px;
-            background: rgba(255,255,255,0.08);
+            background: var(--border);
         }
 
         .divider::before { left: 0; }
@@ -582,100 +525,187 @@
         .current-tv {
             text-align: center;
             font-size: 11px;
-            color: #888;
+            color: var(--text-secondary);
             margin-bottom: 16px;
             padding: 8px;
-            background: rgba(255,255,255,0.03);
+            background: var(--bg-card);
             border-radius: 8px;
         }
 
-        .current-tv strong {
-            color: #2ecc71;
-        }
+        .current-tv strong { color: var(--success); }
 
-        /* Setup screen */
-        .setup-screen {
-            display: none;
+        /* ============================================================
+           SETTINGS PAGE (native-style slide-in)
+        ============================================================ */
+        .settings-page {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000;
-            z-index: 900;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-        }
-
-        .setup-screen.active {
+            inset: 0;
+            background: var(--settings-bg);
+            z-index: 1100;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex;
+            flex-direction: column;
         }
 
-        .setup-screen h1 {
-            font-size: 22px;
-            margin: 0 0 8px 0;
+        .settings-page.active { transform: translateX(0); }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px 8px;
+            padding-top: calc(env(safe-area-inset-top, 10px) + 12px);
+            background: var(--settings-bg);
+            border-bottom: 1px solid var(--settings-sep);
         }
 
-        .setup-screen p {
-            color: #888;
-            font-size: 14px;
-            text-align: center;
-            margin: 0 0 30px 0;
-        }
-
-        .setup-screen .discover-btn {
-            width: 100%;
-            max-width: 280px;
-            height: 50px;
+        .settings-back {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent);
             font-size: 16px;
-        }
-
-        .setup-screen .divider {
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .setup-manual {
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .setup-manual input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: #1a1a28;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 12px;
-            outline: none;
-            text-align: center;
-        }
-
-        .setup-manual input:focus {
-            border-color: #3498db;
-        }
-
-        .setup-manual .btn.primary {
-            width: 100%;
-            height: 44px;
-            font-size: 14px;
-            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+            background: none;
             border: none;
-            border-radius: 10px;
+            cursor: pointer;
+            padding: 6px 0;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .settings-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
+
+        .settings-spacer { width: 60px; }
+
+        .settings-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 16px;
+            padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 24px);
+        }
+
+        .settings-section { margin-bottom: 28px; }
+
+        .settings-section-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        .settings-card {
+            background: var(--settings-row);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--settings-sep);
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            gap: 12px;
+            border-bottom: 1px solid var(--settings-sep);
+        }
+
+        .settings-row:last-child { border-bottom: none; }
+
+        .settings-row-tappable { cursor: pointer; }
+        .settings-row-tappable:active { background: rgba(255,255,255,0.05); }
+
+        .settings-row-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+
+        .settings-row-content { flex: 1; min-width: 0; }
+        .settings-row-title { font-size: 15px; color: var(--text-primary); }
+        .settings-row-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .settings-row-value { font-size: 14px; color: var(--text-secondary); flex-shrink: 0; }
+
+        .settings-row-chevron { font-size: 20px; color: var(--text-muted); flex-shrink: 0; line-height: 1; }
+
+        .settings-row-action {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 13px;
+            padding: 6px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .settings-row-action:active { opacity: 0.7; }
+        .settings-row-action:disabled { opacity: 0.4; cursor: default; }
+
+        .settings-row-action.primary {
+            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: #fff;
+            border: none;
+        }
+
+        .settings-row-action.success {
+            background: linear-gradient(180deg, #27ae60 0%, var(--green-dark) 100%);
+            color: #fff;
+            border: none;
+        }
+
+        /* Segmented control for theme */
+        .settings-segmented {
+            display: flex;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .seg-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .seg-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Pro badge */
+        .pro-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f1c40f, #e67e22);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        /* ============================================================
+           SHARED UTILITIES
+        ============================================================ */
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 16px; height: 16px;
             border: 2px solid rgba(255,255,255,0.3);
             border-top-color: white;
             border-radius: 50%;
@@ -684,6 +714,7 @@
     </style>
 </head>
 <body>
+
     <!-- Setup Screen (shown when no TV configured) -->
     <div class="setup-screen" id="setupScreen">
         <h1>Philips Remote</h1>
@@ -691,7 +722,8 @@
 
         <button class="discover-btn" id="setupScanBtn" onclick="startDiscovery('setup')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                <circle cx="12" cy="12" r="1"/>
+                <path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
                 <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
             </svg>
             Scan Network
@@ -720,7 +752,7 @@
                     <h1 id="tvTitle">PHILIPS TV</h1>
                     <div id="tvStatus" class="status connected">Connected</div>
                 </div>
-                <button class="btn settings" onclick="openSettings()">
+                <button class="btn settings-btn" onclick="openSettingsPage()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"/>
                         <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
@@ -731,7 +763,7 @@
             <div class="volume-row">
                 <div class="volume-slider">
                     <span>🔈</span>
-                    <input type="range" id="volumeSlider" min="1" max="60" value="30" onchange="setVolume(this.value)">
+                    <input type="range" id="volumeSlider" min="0" max="60" value="30" onchange="setVolume(this.value)">
                     <span class="volume-value" id="volumeValue">30</span>
                 </div>
             </div>
@@ -816,25 +848,26 @@
                 </div>
 
                 <div class="color-row">
-                    <button class="btn color-red" onclick="sendKey('RedColour')"></button>
-                    <button class="btn color-green" onclick="sendKey('GreenColour')"></button>
+                    <button class="btn color-red"    onclick="sendKey('RedColour')"></button>
+                    <button class="btn color-green"  onclick="sendKey('GreenColour')"></button>
                     <button class="btn color-yellow" onclick="sendKey('YellowColour')"></button>
-                    <button class="btn color-blue" onclick="sendKey('BlueColour')"></button>
+                    <button class="btn color-blue"   onclick="sendKey('BlueColour')"></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsModal">
+    <!-- TV Discovery Modal (used from Settings too) -->
+    <div class="modal-overlay" id="tvModal">
         <div class="modal">
-            <h2>Settings</h2>
+            <h2>Change TV</h2>
 
-            <div id="currentTvInfo" class="current-tv" style="display:none;"></div>
+            <div id="modalCurrentTvInfo" class="current-tv" style="display:none;"></div>
 
             <button class="discover-btn" id="modalScanBtn" onclick="startDiscovery('modal')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                    <circle cx="12" cy="12" r="1"/>
+                    <path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
                     <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
                 </svg>
                 Scan Network
@@ -848,20 +881,405 @@
             <input type="text" id="manualIpInput" placeholder="192.168.1.100" inputmode="decimal">
 
             <div class="modal-buttons">
-                <button class="btn" onclick="closeSettings()">Cancel</button>
+                <button class="btn" onclick="closeTvModal()">Cancel</button>
                 <button class="btn primary" onclick="manualConnect('modal')">Connect</button>
             </div>
         </div>
     </div>
 
-    <script>
-        const VOLUME_POLL_INTERVAL = 10000; // ms
-        let pollTimer = null;
+    <!-- Settings Page -->
+    <div class="settings-page" id="settingsPage">
+        <div class="settings-header">
+            <button class="settings-back" onclick="closeSettingsPage()">
+                <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 1 L1 8 L9 15"/>
+                </svg>
+                Back
+            </button>
+            <span class="settings-title">Settings</span>
+            <div class="settings-spacer"></div>
+        </div>
 
-        // Server URL (for iOS app connecting to remote server)
+        <div class="settings-body">
+
+            <!-- TV Connection -->
+            <div class="settings-section">
+                <div class="settings-section-label">TV Connection</div>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <div class="settings-row-icon">📺</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title" id="settingsTvName">No TV Connected</div>
+                            <div class="settings-row-subtitle" id="settingsTvIp">Tap Change to configure</div>
+                        </div>
+                        <button class="settings-row-action" onclick="openTvModal()">Change</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance -->
+            <div class="settings-section">
+                <div class="settings-section-label">Appearance</div>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <div class="settings-row-icon">🎨</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Theme</div>
+                        </div>
+                        <div class="settings-segmented" id="themeSegmented">
+                            <button class="seg-btn" data-theme-val="dark"   onclick="setTheme('dark')">Dark</button>
+                            <button class="seg-btn" data-theme-val="light"  onclick="setTheme('light')">Light</button>
+                            <button class="seg-btn" data-theme-val="system" onclick="setTheme('system')">Auto</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro -->
+            <div class="settings-section">
+                <div class="settings-section-label">Philips Remote Pro</div>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <div class="settings-row-icon">✨</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">
+                                Remove Ads
+                                <span class="pro-badge" id="proBadge" style="display:none;">PRO</span>
+                            </div>
+                            <div class="settings-row-subtitle" id="removeAdsSubtitle">One-time purchase</div>
+                        </div>
+                        <button class="settings-row-action primary" id="removeAdsBtn" onclick="purchaseRemoveAds()">Buy</button>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-icon">🔄</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Restore Purchase</div>
+                        </div>
+                        <button class="settings-row-action" id="restoreBtn" onclick="restorePurchases()">Restore</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support -->
+            <div class="settings-section">
+                <div class="settings-section-label">Support</div>
+                <div class="settings-card">
+                    <div class="settings-row settings-row-tappable" onclick="leaveReview()">
+                        <div class="settings-row-icon">⭐</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Leave a Review</div>
+                        </div>
+                        <div class="settings-row-chevron">›</div>
+                    </div>
+                    <div class="settings-row settings-row-tappable" onclick="reportBug()">
+                        <div class="settings-row-icon">🐛</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Report a Bug</div>
+                        </div>
+                        <div class="settings-row-chevron">›</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About -->
+            <div class="settings-section">
+                <div class="settings-section-label">About</div>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <div class="settings-row-icon">📱</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Version</div>
+                        </div>
+                        <div class="settings-row-value" id="appVersionLabel">1.0.0</div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-icon">👤</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Author</div>
+                        </div>
+                        <div class="settings-row-value">zloi2ff</div>
+                    </div>
+                    <div class="settings-row settings-row-tappable" onclick="openPrivacyPolicy()">
+                        <div class="settings-row-icon">🔒</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Privacy Policy</div>
+                        </div>
+                        <div class="settings-row-chevron">›</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // THEME — must run before DOMContentLoaded to avoid flash
+        // ============================================================
+
+        function applyTheme(theme) {
+            const resolved = theme === 'system' ? 'system' : theme;
+            document.documentElement.setAttribute('data-theme', resolved);
+        }
+
+        (function initTheme() {
+            applyTheme(localStorage.getItem('theme') || 'dark');
+        })();
+
+        function setTheme(theme) {
+            localStorage.setItem('theme', theme);
+            applyTheme(theme);
+            document.querySelectorAll('#themeSegmented .seg-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.themeVal === theme);
+            });
+        }
+
+        function syncThemeSegmented() {
+            const current = localStorage.getItem('theme') || 'dark';
+            document.querySelectorAll('#themeSegmented .seg-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.themeVal === current);
+            });
+        }
+
+        // ============================================================
+        // MONETIZATION CONFIG — fill in before submitting to App Store
+        // ============================================================
+
+        const MONETIZATION = {
+            admobBannerId:  'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX', // TODO: replace with real iOS Banner Unit ID
+            rcApiKeyIos:    'appl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',  // TODO: replace with RevenueCat iOS API key
+            entitlementId:  'pro',
+            productId:      'remove_ads',                             // must match App Store Connect product ID
+            appStoreId:     'XXXXXXXXXX',                             // TODO: replace with your numeric App Store ID
+            privacyUrl:     'https://github.com/zloi2ff/philips-remote/blob/master/PRIVACY.md',
+            bugsUrl:        'https://github.com/zloi2ff/philips-remote/issues/new',
+        };
+
+        let adsRemoved = localStorage.getItem('adsRemoved') === 'true';
+
+        // ============================================================
+        // CAPACITOR HELPERS
+        // ============================================================
+
+        const isNative = () => !!(window.Capacitor?.isNativePlatform?.());
+        const getPlugin = name => window.Capacitor?.Plugins?.[name] ?? null;
+
+        function openUrl(url) {
+            const Browser = getPlugin('Browser');
+            if (Browser) Browser.open({ url });
+            else window.open(url, '_blank');
+        }
+
+        // ============================================================
+        // ADMOB
+        // ============================================================
+
+        async function initAdMob() {
+            if (adsRemoved || !isNative()) return;
+            const AdMob = getPlugin('AdMob');
+            if (!AdMob) return;
+            try {
+                await AdMob.initialize({ initializeForTesting: false });
+                try { await AdMob.requestTrackingAuthorization(); } catch {}
+                await AdMob.showBanner({
+                    adId:     MONETIZATION.admobBannerId,
+                    adSize:   'ADAPTIVE_BANNER',
+                    position: 'BOTTOM_CENTER',
+                    margin:   0,
+                    isTesting: false,
+                });
+                // Account for banner height in layout
+                document.getElementById('tvPage').style.paddingBottom = '70px';
+            } catch (e) {
+                console.warn('AdMob:', e);
+            }
+        }
+
+        async function removeBannerAd() {
+            if (!isNative()) return;
+            const AdMob = getPlugin('AdMob');
+            if (!AdMob) return;
+            try { await AdMob.removeBanner(); } catch {}
+            document.getElementById('tvPage').style.paddingBottom = '';
+        }
+
+        // ============================================================
+        // REVENUECAT — In-App Purchase
+        // ============================================================
+
+        async function initRevenueCat() {
+            if (!isNative()) return;
+            const Purchases = getPlugin('Purchases');
+            if (!Purchases) return;
+            try {
+                await Purchases.configure({ apiKey: MONETIZATION.rcApiKeyIos });
+                const { customerInfo } = await Purchases.getCustomerInfo();
+                if (checkEntitlement(customerInfo)) {
+                    setAdsRemoved(true, false); // silent — don't remove banner (already off)
+                }
+            } catch (e) {
+                console.warn('RevenueCat init:', e);
+            }
+        }
+
+        function checkEntitlement(customerInfo) {
+            return !!customerInfo?.entitlements?.active?.[MONETIZATION.entitlementId];
+        }
+
+        function setAdsRemoved(value, removeBanner = true) {
+            adsRemoved = value;
+            localStorage.setItem('adsRemoved', value ? 'true' : 'false');
+            if (value && removeBanner) removeBannerAd();
+            syncProUI();
+        }
+
+        function syncProUI() {
+            const btn      = document.getElementById('removeAdsBtn');
+            const badge    = document.getElementById('proBadge');
+            const subtitle = document.getElementById('removeAdsSubtitle');
+            const restore  = document.getElementById('restoreBtn');
+
+            if (adsRemoved) {
+                if (btn)      { btn.textContent = 'Active'; btn.disabled = true; btn.style.opacity = '0.5'; }
+                if (badge)    badge.style.display = 'inline-block';
+                if (subtitle) subtitle.textContent = 'Ads are removed — thank you!';
+                if (restore)  { restore.style.opacity = '0.4'; restore.disabled = true; }
+            } else {
+                if (btn)      { btn.textContent = 'Buy'; btn.disabled = false; btn.style.opacity = ''; }
+                if (badge)    badge.style.display = 'none';
+                if (subtitle) subtitle.textContent = 'One-time purchase';
+                if (restore)  { restore.style.opacity = ''; restore.disabled = false; }
+            }
+        }
+
+        async function purchaseRemoveAds() {
+            if (!isNative()) { alert('In-App Purchase is only available in the iOS app.'); return; }
+            const Purchases = getPlugin('Purchases');
+            if (!Purchases) { alert('Purchases plugin not available.'); return; }
+
+            const btn = document.getElementById('removeAdsBtn');
+            btn.innerHTML = '<span class="spinner"></span>';
+            btn.disabled = true;
+
+            try {
+                const offerings = await Purchases.getOfferings();
+                const pkg = offerings?.current?.availablePackages?.find(
+                    p => p.storeProduct?.productIdentifier === MONETIZATION.productId
+                );
+                if (!pkg) { alert('Product not available. Try again later.'); return; }
+
+                const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg });
+                if (checkEntitlement(customerInfo)) {
+                    setAdsRemoved(true);
+                    haptic();
+                    alert('Ads removed! Thank you for your support ❤️');
+                }
+            } catch (e) {
+                if (e?.code !== 'PURCHASE_CANCELLED') alert('Purchase failed. Please try again.');
+            } finally {
+                syncProUI();
+            }
+        }
+
+        async function restorePurchases() {
+            if (!isNative()) return;
+            const Purchases = getPlugin('Purchases');
+            if (!Purchases) return;
+
+            const btn = document.getElementById('restoreBtn');
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const { customerInfo } = await Purchases.restorePurchases();
+                if (checkEntitlement(customerInfo)) {
+                    setAdsRemoved(true);
+                    alert('Purchase restored successfully!');
+                } else {
+                    alert('No previous purchase found.');
+                }
+            } catch {
+                alert('Restore failed. Please try again.');
+            } finally {
+                btn.textContent = 'Restore';
+                btn.disabled = false;
+            }
+        }
+
+        // ============================================================
+        // SETTINGS PAGE
+        // ============================================================
+
+        async function openSettingsPage() {
+            const config = await loadConfig();
+            const name = localStorage.getItem('tvName');
+
+            document.getElementById('settingsTvName').textContent = name || 'No TV Connected';
+            document.getElementById('settingsTvIp').textContent =
+                config?.ip ? `${config.ip}:${config.port} · API v${config.apiVersion || 1}` : 'Tap Change to configure';
+
+            try {
+                const ver = window.Capacitor?.PluginHeaders?.find?.(p => p.name === 'Device')?.version || '1.0.0';
+                document.getElementById('appVersionLabel').textContent = ver;
+            } catch {}
+
+            syncThemeSegmented();
+            syncProUI();
+            document.getElementById('settingsPage').classList.add('active');
+        }
+
+        function closeSettingsPage() {
+            document.getElementById('settingsPage').classList.remove('active');
+        }
+
+        // ============================================================
+        // TV DISCOVERY MODAL
+        // ============================================================
+
+        async function openTvModal() {
+            const config = await loadConfig();
+            const infoEl = document.getElementById('modalCurrentTvInfo');
+
+            if (config?.ip) {
+                const name = localStorage.getItem('tvName') || 'Philips TV';
+                infoEl.innerHTML = `Connected to: <strong>${name}</strong> (${config.ip}:${config.port})`;
+                infoEl.style.display = 'block';
+            } else {
+                infoEl.style.display = 'none';
+            }
+
+            document.getElementById('modalTvList').innerHTML = '';
+            document.getElementById('manualIpInput').value = config?.ip || '';
+            document.getElementById('tvModal').classList.add('active');
+        }
+
+        function closeTvModal() {
+            document.getElementById('tvModal').classList.remove('active');
+        }
+
+        // ============================================================
+        // SUPPORT LINKS
+        // ============================================================
+
+        function leaveReview() {
+            openUrl(`https://apps.apple.com/app/id${MONETIZATION.appStoreId}?action=write-review`);
+        }
+
+        function reportBug() {
+            openUrl(MONETIZATION.bugsUrl);
+        }
+
+        function openPrivacyPolicy() {
+            openUrl(MONETIZATION.privacyUrl);
+        }
+
+        // ============================================================
+        // SERVER CONFIG
+        // ============================================================
+
         function getServerUrl() {
             if (window.location.protocol !== 'file:') return '';
-            const ip = localStorage.getItem('serverIp');
+            const ip   = localStorage.getItem('serverIp');
             const port = localStorage.getItem('serverPort') || '8888';
             return ip ? `http://${ip}:${port}` : '';
         }
@@ -871,16 +1289,12 @@
             return `${getServerUrl()}/api/${version}`;
         }
 
-        // --- TV Discovery & Configuration ---
-
         async function loadConfig() {
             try {
                 const res = await fetch(`${getServerUrl()}/config`);
                 if (!res.ok) return null;
                 return await res.json();
-            } catch {
-                return null;
-            }
+            } catch { return null; }
         }
 
         async function saveConfig(ip, port, apiVersion) {
@@ -888,28 +1302,32 @@
                 await fetch(`${getServerUrl()}/config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ip, port: port || 1925, apiVersion: apiVersion || 1 })
+                    body: JSON.stringify({ ip, port: port || 1925, apiVersion: apiVersion || 1 }),
                 });
             } catch {}
         }
 
+        // ============================================================
+        // TV DISCOVERY
+        // ============================================================
+
         async function startDiscovery(context) {
-            const btnId = context === 'setup' ? 'setupScanBtn' : 'modalScanBtn';
-            const listId = context === 'setup' ? 'setupTvList' : 'modalTvList';
-            const btn = document.getElementById(btnId);
-            const list = document.getElementById(listId);
+            const btnId  = context === 'setup' ? 'setupScanBtn' : 'modalScanBtn';
+            const listId = context === 'setup' ? 'setupTvList'  : 'modalTvList';
+            const btn    = document.getElementById(btnId);
+            const list   = document.getElementById(listId);
 
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Scanning...';
             list.innerHTML = '';
 
             try {
-                const res = await fetch(`${getServerUrl()}/discover`);
+                const res  = await fetch(`${getServerUrl()}/discover`);
                 const data = await res.json();
 
-                if (data.tvs && data.tvs.length > 0) {
+                if (data.tvs?.length > 0) {
                     list.innerHTML = data.tvs.map(tv => `
-                        <div class="tv-item" onclick="selectTv('${tv.ip}', ${tv.port}, ${tv.apiVersion || 1}, '${tv.name}', this, '${context}')">
+                        <div class="tv-item" onclick="selectTv('${tv.ip}',${tv.port},${tv.apiVersion||1},'${tv.name}',this,'${context}')">
                             <div class="tv-item-info">
                                 <div class="tv-item-name">${tv.name || 'Philips TV'}</div>
                                 <div class="tv-item-ip">${tv.ip}:${tv.port}${tv.model ? ' — ' + tv.model : ''} · API v${tv.apiVersion || 1}</div>
@@ -918,24 +1336,25 @@
                         </div>
                     `).join('');
                 } else {
-                    list.innerHTML = '<div style="text-align:center;color:#888;font-size:12px;padding:12px;">No TVs found on the network</div>';
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:12px;padding:12px;">No TVs found on the network</div>';
                 }
             } catch {
-                list.innerHTML = '<div style="text-align:center;color:#e74c3c;font-size:12px;padding:12px;">Scan failed</div>';
+                list.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:12px;padding:12px;">Scan failed</div>';
             }
 
             btn.disabled = false;
             btn.innerHTML = `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                    <circle cx="12" cy="12" r="1"/>
+                    <path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
                     <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
                 </svg>
                 Scan Again`;
         }
 
         async function selectTv(ip, port, apiVersion, name, el, context) {
-            const listId = context === 'setup' ? 'setupTvList' : 'modalTvList';
-            document.querySelectorAll(`#${listId} .tv-item`).forEach(i => i.classList.remove('selected'));
+            document.querySelectorAll(`#${context === 'setup' ? 'setupTvList' : 'modalTvList'} .tv-item`)
+                .forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
 
             await saveConfig(ip, port, apiVersion);
@@ -943,11 +1362,8 @@
             localStorage.setItem('tvApiVersion', apiVersion || '1');
             document.getElementById('tvTitle').textContent = (name || 'PHILIPS TV').toUpperCase();
 
-            if (context === 'setup') {
-                document.getElementById('setupScreen').classList.remove('active');
-            } else {
-                closeSettings();
-            }
+            if (context === 'setup') document.getElementById('setupScreen').classList.remove('active');
+            else closeTvModal();
 
             await loadTvCapabilities();
             startPolling();
@@ -959,76 +1375,23 @@
             if (!ip) return;
 
             await saveConfig(ip, 1925, 1);
+            localStorage.setItem('tvApiVersion', '1');
 
-            if (context === 'setup') {
-                document.getElementById('setupScreen').classList.remove('active');
-            } else {
-                closeSettings();
-            }
+            if (context === 'setup') document.getElementById('setupScreen').classList.remove('active');
+            else closeTvModal();
 
             await loadTvCapabilities();
             startPolling();
         }
 
-        // --- Settings Modal ---
-
-        async function openSettings() {
-            const config = await loadConfig();
-            const infoEl = document.getElementById('currentTvInfo');
-
-            if (config && config.ip) {
-                const name = localStorage.getItem('tvName') || 'Philips TV';
-                infoEl.innerHTML = `Connected to: <strong>${name}</strong> (${config.ip}:${config.port})`;
-                infoEl.style.display = 'block';
-            } else {
-                infoEl.style.display = 'none';
-            }
-
-            document.getElementById('modalTvList').innerHTML = '';
-            document.getElementById('manualIpInput').value = config ? config.ip : '';
-            document.getElementById('settingsModal').classList.add('active');
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').classList.remove('active');
-        }
-
-        // --- Haptic feedback ---
-
-        function haptic() {
-            try {
-                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
-                    window.Capacitor.Plugins.Haptics.impact({ style: 'Light' });
-                }
-            } catch {}
-        }
-
-        // --- Button feedback ---
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.addEventListener('touchstart', function() {
-                    this.classList.add('flash');
-                    haptic();
-                }, { passive: true });
-                btn.addEventListener('touchend', function() {
-                    this.classList.remove('flash');
-                }, { passive: true });
-            });
-        });
-
-        // --- TV Capabilities (dynamic sources + volume range) ---
+        // ============================================================
+        // TV CAPABILITIES (dynamic sources + volume range)
+        // ============================================================
 
         function normalizeSources(data) {
-            // v6 Android TV: plain array [{id, name, type}]
-            if (Array.isArray(data)) {
-                return data.map(s => ({ id: s.id, name: s.name || s.id }));
-            }
-            // v1/v5: {sources: [...]} or {sources: {id: {name}}}
+            if (Array.isArray(data)) return data.map(s => ({ id: s.id, name: s.name || s.id }));
             const raw = data.sources || data;
-            if (Array.isArray(raw)) {
-                return raw.map(s => ({ id: s.id, name: s.name || s.id }));
-            }
+            if (Array.isArray(raw)) return raw.map(s => ({ id: s.id, name: s.name || s.id }));
             if (raw && typeof raw === 'object') {
                 return Object.entries(raw).map(([key, s]) => ({
                     id:   typeof s === 'object' ? (s.id ?? parseInt(key)) : parseInt(key),
@@ -1040,14 +1403,12 @@
 
         async function loadTvCapabilities() {
             try {
-                // Load volume range
                 const volRes = await fetch(`${getApiBase()}/audio/volume`);
                 if (volRes.ok) {
                     const vol = await volRes.json();
-                    const max = vol.max || 60;
                     const slider = document.getElementById('volumeSlider');
-                    slider.max = max;
-                    slider.min = vol.min ?? 0;
+                    slider.max   = vol.max ?? 60;
+                    slider.min   = vol.min ?? 0;
                     if (vol.current !== undefined) {
                         slider.value = vol.current;
                         document.getElementById('volumeValue').textContent = vol.current;
@@ -1056,24 +1417,33 @@
             } catch {}
 
             try {
-                // Load sources dynamically
                 const srcRes = await fetch(`${getApiBase()}/sources`);
                 if (srcRes.ok) {
-                    const data    = await srcRes.json();
-                    const sources = normalizeSources(data);
-                    renderSources(sources);
+                    const sources = normalizeSources(await srcRes.json());
+                    if (sources.length) renderSources(sources);
                 }
             } catch {}
         }
 
         function renderSources(sources) {
             const grid = document.getElementById('sourcesGrid');
-            if (!sources.length) return;
             grid.innerHTML = sources.map(s =>
                 `<button class="btn" onclick="setSource(${JSON.stringify(s.id)})">${s.name}</button>`
             ).join('');
-            // Re-attach touch feedback for new buttons
-            grid.querySelectorAll('.btn').forEach(btn => {
+            attachTouchFeedback(grid.querySelectorAll('.btn'));
+        }
+
+        // ============================================================
+        // HAPTIC & BUTTON FEEDBACK
+        // ============================================================
+
+        function haptic() {
+            const Haptics = getPlugin('Haptics');
+            if (Haptics) try { Haptics.impact({ style: 'Light' }); } catch {}
+        }
+
+        function attachTouchFeedback(buttons) {
+            buttons.forEach(btn => {
                 btn.addEventListener('touchstart', function() {
                     this.classList.add('flash'); haptic();
                 }, { passive: true });
@@ -1083,12 +1453,18 @@
             });
         }
 
-        // --- Remote Controls ---
+        document.addEventListener('DOMContentLoaded', function() {
+            attachTouchFeedback(document.querySelectorAll('.btn'));
+        });
+
+        // ============================================================
+        // REMOTE CONTROLS
+        // ============================================================
 
         function toggleExpand(page) {
-            const btn = document.getElementById(page + 'ExpandBtn');
+            const btn    = document.getElementById(page + 'ExpandBtn');
             const content = document.getElementById(page + 'Collapsible');
-            const pageEl = document.getElementById(page + 'Page');
+            const pageEl  = document.getElementById(page + 'Page');
             btn.classList.toggle('expanded');
             content.classList.toggle('expanded');
             pageEl.classList.toggle('expanded');
@@ -1101,7 +1477,7 @@
                 const response = await fetch(`${getApiBase()}/input/key`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key })
+                    body: JSON.stringify({ key }),
                 });
                 showStatus(response.ok ? 'connected' : 'error', response.ok ? key : 'Error');
             } catch {
@@ -1115,7 +1491,7 @@
                 await fetch(`${getApiBase()}/audio/volume`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ current: parseInt(value), muted: false })
+                    body: JSON.stringify({ current: parseInt(value), muted: false }),
                 });
                 showStatus('connected', `Vol: ${value}`);
             } catch {
@@ -1128,7 +1504,7 @@
                 await fetch(`${getApiBase()}/sources/current`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
+                    body: JSON.stringify({ id }),
                 });
                 showStatus('connected', 'Source OK');
             } catch {
@@ -1155,7 +1531,12 @@
             status.textContent = message;
         }
 
-        // --- Polling with visibility awareness ---
+        // ============================================================
+        // POLLING
+        // ============================================================
+
+        const VOLUME_POLL_INTERVAL = 10000;
+        let pollTimer = null;
 
         function startPolling() {
             getVolume();
@@ -1164,33 +1545,38 @@
         }
 
         function stopPolling() {
-            if (pollTimer) {
-                clearInterval(pollTimer);
-                pollTimer = null;
-            }
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
         }
 
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                startPolling();
-            } else {
-                stopPolling();
-            }
+            if (document.visibilityState === 'visible') startPolling();
+            else stopPolling();
         });
 
-        // --- Init ---
+        // ============================================================
+        // INIT
+        // ============================================================
 
         (async function init() {
             const config = await loadConfig();
-            if (config && config.ip) {
-                // Sync API version from server into localStorage
+
+            if (config?.ip) {
                 if (config.apiVersion) localStorage.setItem('tvApiVersion', config.apiVersion);
                 const name = localStorage.getItem('tvName');
                 if (name) document.getElementById('tvTitle').textContent = name.toUpperCase();
-                await loadTvCapabilities();
+
+                await Promise.all([
+                    loadTvCapabilities(),
+                    initRevenueCat(),
+                ]);
+
+                if (!adsRemoved) await initAdMob();
+
                 startPolling();
             } else {
                 document.getElementById('setupScreen').classList.add('active');
+                // Still init purchases to check entitlement state
+                await initRevenueCat();
             }
         })();
     </script>
