@@ -13,6 +13,10 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
 
+    <!-- Content Security Policy -->
+    <!-- connect-src: * required because TV IP is arbitrary (user-configured) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src *; img-src 'self' data:; media-src 'none'; object-src 'none';">
+
     <style>
         /* ============================================================
            THEME VARIABLES
@@ -1055,7 +1059,23 @@
             bugsUrl:        'https://github.com/zloi2ff/philips-remote/issues/new',
         };
 
+        // adsRemoved: read from localStorage as a UI cache to prevent ad flash on startup.
+        // The real entitlement is always verified via RevenueCat in initRevenueCat()
+        // and localStorage is overwritten with the authoritative server value.
         let adsRemoved = localStorage.getItem('adsRemoved') === 'true';
+
+        // ============================================================
+        // XSS HELPERS
+        // ============================================================
+
+        function escHtml(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         // ============================================================
         // CAPACITOR HELPERS
@@ -1108,17 +1128,23 @@
         // ============================================================
 
         async function initRevenueCat() {
-            if (!isNative()) return;
+            if (!isNative()) {
+                // Not running as a native app — trust localStorage cache as-is
+                return;
+            }
             const Purchases = getPlugin('Purchases');
             if (!Purchases) return;
             try {
                 await Purchases.configure({ apiKey: MONETIZATION.rcApiKeyIos });
                 const { customerInfo } = await Purchases.getCustomerInfo();
-                if (checkEntitlement(customerInfo)) {
-                    setAdsRemoved(true, false); // silent — don't remove banner (already off)
-                }
+                // Always overwrite localStorage with the authoritative entitlement
+                // value from RevenueCat. This prevents a bypassed localStorage flag
+                // from permanently hiding ads without a valid purchase.
+                const hasPro = checkEntitlement(customerInfo);
+                setAdsRemoved(hasPro, !hasPro); // remove banner only when revoking
             } catch (e) {
                 console.warn('RevenueCat init:', e);
+                // RevenueCat unavailable — keep localStorage value as fallback
             }
         }
 
@@ -1242,7 +1268,8 @@
 
             if (config?.ip) {
                 const name = localStorage.getItem('tvName') || 'Philips TV';
-                infoEl.innerHTML = `Connected to: <strong>${name}</strong> (${config.ip}:${config.port})`;
+                infoEl.innerHTML = `Connected to: <strong>${escHtml(name)}</strong> (${escHtml(config.ip)}:${escHtml(String(config.port))})`;
+
                 infoEl.style.display = 'block';
             } else {
                 infoEl.style.display = 'none';
@@ -1326,15 +1353,27 @@
                 const data = await res.json();
 
                 if (data.tvs?.length > 0) {
-                    list.innerHTML = data.tvs.map(tv => `
-                        <div class="tv-item" onclick="selectTv('${tv.ip}',${tv.port},${tv.apiVersion||1},'${tv.name}',this,'${context}')">
+                    list.innerHTML = data.tvs.map(tv => {
+                        // Use JSON.stringify for onclick args to safely handle
+                        // any special characters in IP / name strings (XSS prevention)
+                        const onclickArgs = [
+                            JSON.stringify(tv.ip),
+                            tv.port,
+                            tv.apiVersion || 1,
+                            JSON.stringify(tv.name || 'Philips TV'),
+                            'this',
+                            JSON.stringify(context),
+                        ].join(',');
+                        const modelPart = tv.model ? ` — ${escHtml(tv.model)}` : '';
+                        return `
+                        <div class="tv-item" onclick="selectTv(${onclickArgs})">
                             <div class="tv-item-info">
-                                <div class="tv-item-name">${tv.name || 'Philips TV'}</div>
-                                <div class="tv-item-ip">${tv.ip}:${tv.port}${tv.model ? ' — ' + tv.model : ''} · API v${tv.apiVersion || 1}</div>
+                                <div class="tv-item-name">${escHtml(tv.name || 'Philips TV')}</div>
+                                <div class="tv-item-ip">${escHtml(tv.ip)}:${escHtml(String(tv.port))}${modelPart} · API v${escHtml(String(tv.apiVersion || 1))}</div>
                             </div>
                             <div class="tv-item-check">✓</div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 } else {
                     list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:12px;padding:12px;">No TVs found on the network</div>';
                 }
@@ -1428,7 +1467,7 @@
         function renderSources(sources) {
             const grid = document.getElementById('sourcesGrid');
             grid.innerHTML = sources.map(s =>
-                `<button class="btn" onclick="setSource(${JSON.stringify(s.id)})">${s.name}</button>`
+                `<button class="btn" onclick="setSource(${JSON.stringify(s.id)})">${escHtml(s.name)}</button>`
             ).join('');
             attachTouchFeedback(grid.querySelectorAll('.btn'));
         }
