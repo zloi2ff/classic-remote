@@ -1132,8 +1132,9 @@
                     margin:   0,
                     isTesting: false,
                 });
-                // Account for banner height in layout
-                document.getElementById('tvPage').style.paddingBottom = '70px';
+                // Banner height ~50px + safe area inset (home indicator on iPhone X+)
+                document.getElementById('tvPage').style.paddingBottom =
+                    'calc(70px + env(safe-area-inset-bottom))';
             } catch (e) {
                 console.warn('AdMob:', e);
             }
