@@ -15,10 +15,62 @@ Web-based remote control for Philips Smart TV (JointSpace API v1/v5/v6). Availab
 ![Capacitor](https://img.shields.io/badge/Capacitor-8.x-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## Supported TV
+## Supported TVs
 
-- **Model:** Philips 42PFL6158K/12 (and similar 6xxx series)
-- **API:** JointSpace v1 (port 1925)
+The app uses the JointSpace API (port 1925) and auto-detects the API version. The app tries v1 → v6 → v5 on connection.
+
+> **To activate JointSpace on 2011–2015 TVs:** open the TV menu and enter code `5646877223` on the remote.
+
+### API v1 — HTTP, no authentication (2009–2015)
+
+All non-Android Philips TVs from 2009 to 2015. No pairing required.
+
+| Year | Model pattern | Example |
+|------|--------------|---------|
+| 2009 | xxPFL8xxx, xxPFL9xxx | 42PFL8684H/12 |
+| 2010 | xxPFL7xxx, xxPFL8xxx, xxPFL9xxx | 46PFL8605H/12 |
+| 2011 | xxPFL5**6**xx–xxPFL9**6**xx | 42PFL6158K/12 |
+| 2012 | xxPFL5**7**xx–xxPFL8**7**xx | 47PFL6678S/12 |
+| 2013 | xxPFL5**8**xx–xxPFL8**8**xx _(non-Android)_ | 55PFL6678S/12 |
+| 2014 | xxPFL5**9**xx, xxPUS6**9**xx _(non-Android)_ | 42PUS6809/12 |
+| 2015 | xxPFL5**0**xx, xxPUS6**0**xx _(non-Android)_ | 43PUS6031/12 |
+
+The last digit of the 4-digit series number encodes the year (6=2011, 7=2012, 8=2013, 9=2014, 0=2015).
+
+### API v5 — HTTP, no authentication (2014–2015)
+
+Transitional generation. Same protocol as v1, superset of commands. Many v5 TVs also respond on `/1/`.
+
+| Year | Model pattern |
+|------|--------------|
+| 2014–2015 | xxPUS6**9**xx, xxPUS7**9**xx, xxPUS6**0**xx, xxPUS7**0**xx _(non-Android / Saphi OS)_ |
+
+### API v6 — HTTPS, PIN pairing required (2016–present)
+
+#### Saphi OS (non-Android) — port 1925, HTTPS
+
+Budget and mid-range TVs from 2016+ running Philips' own Saphi Linux OS.
+
+| Year | Model pattern | Example |
+|------|--------------|---------|
+| 2016 | xxPUS6**1**xx, xxPFT5**1**xx | 43PUS6162/12 |
+| 2017 | xxPUS6**2**xx | 65PUS6162/12 |
+| 2018 | xxPUS6**3**xx | 43PUS6753/12 |
+| 2019+ | xxPUS6**4**xx and lower-end PUS7xxx | — |
+
+#### Android TV — port 1926, HTTPS
+
+Mid-to-high range TVs from 2016+ running Android TV OS. Basic commands (volume, standby, navigation) work. Full control requires port 1926 + digest auth pairing.
+
+| Year | Model pattern | Example |
+|------|--------------|---------|
+| 2016 | xxPUS7**1**xx, xxPUS8**1**xx | 49PUS7101/12 |
+| 2017 | xxPUS7**2**xx, OLEDxx**2** | 55PUS7502/12 |
+| 2018 | xxPUS7**3**xx, xxPUS8**3**xx | 58PUS7304/12 |
+| 2019 | xxPUS7**4**xx, OLEDxx**4** | 55OLED804/12 |
+| 2020+ | xxPUS7**5**xx and newer | — |
+
+> All OLED models (OLED803, OLED804, etc.) are Android TV and use API v6 on port 1926.
 
 ## Features
 
