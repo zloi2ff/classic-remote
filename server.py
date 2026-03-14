@@ -161,7 +161,7 @@ def scan_network(subnet: str, port: int = JOINTSPACE_PORT) -> list[dict]:
         t.start()
 
     for t in threads:
-        t.join(timeout=SCAN_TIMEOUT * 4 + 1)
+        t.join(timeout=SCAN_TIMEOUT * 4 + 2)
 
     return found
 
@@ -337,7 +337,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self.path = '/index.html'
 
         # Static files do not require authentication
-        if not self.path.startswith((API_PREFIX + '/', '/discover', '/config')):
+        if not self.path.startswith((API_PREFIX + '/', '/discover', '/config', '/probe')):
             super().do_GET()
             return
 
@@ -349,6 +349,8 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self._handle_discover()
         elif self.path == '/config':
             self._handle_get_config()
+        elif self.path.startswith('/probe'):
+            self._handle_probe()
         elif self.path.startswith(API_PREFIX + '/'):
             self._proxy_tv('GET')
 
@@ -395,6 +397,24 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({'tvs': tvs})
         finally:
             _discover_lock.release()
+
+    def _handle_probe(self) -> None:
+        """Probe a specific IP for a Philips TV and return its API version/port.
+
+        Query param: ip — must be a valid RFC-1918 address.
+        Returns device info dict on success, 404 if not found.
+        """
+        parsed = urllib.parse.urlparse(self.path)
+        params = urllib.parse.parse_qs(parsed.query)
+        ip = (params.get('ip') or [''])[0].strip()
+        if not is_valid_tv_ip(ip):
+            self._send_json({'error': 'Invalid or non-private IP'}, 400)
+            return
+        result = check_tv(ip, JOINTSPACE_PORT)
+        if result:
+            self._send_json(result)
+        else:
+            self._send_json({'error': 'TV not found'}, 404)
 
     def _handle_get_config(self) -> None:
         """Return current TV configuration."""
@@ -487,6 +507,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         except urllib.error.HTTPError as e:
             error_body = e.read()
             self.send_response(e.code)
+            self.send_header('Content-Type', e.headers.get('Content-Type', 'application/json'))
             self.send_header('Content-Length', len(error_body))
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()

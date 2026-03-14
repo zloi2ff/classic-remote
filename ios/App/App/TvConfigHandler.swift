@@ -29,8 +29,10 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
 
         let port       = (body["port"]       as? Int) ?? 1925
         let apiVersion = (body["apiVersion"] as? Int) ?? 1
+        let authUser   = (body["authUser"]   as? String) ?? ""
+        let authPass   = (body["authPass"]   as? String) ?? ""
 
-        persist(ip: ip, port: port, apiVersion: apiVersion)
+        persist(ip: ip, port: port, apiVersion: apiVersion, authUser: authUser, authPass: authPass)
     }
 
     // MARK: - Private
@@ -46,7 +48,7 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
         return privateRanges.contains(where: { ip.hasPrefix($0) })
     }
 
-    private func persist(ip: String, port: Int, apiVersion: Int) {
+    private func persist(ip: String, port: Int, apiVersion: Int, authUser: String, authPass: String) {
         guard let defaults = UserDefaults(suiteName: Self.appGroupID) else {
             print("[TvConfigHandler] Cannot open App Group UserDefaults — check entitlements.")
             return
@@ -55,6 +57,8 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
         defaults.set(ip,         forKey: "tvIp")
         defaults.set(port,       forKey: "tvPort")
         defaults.set(apiVersion, forKey: "tvApiVersion")
+        defaults.set(authUser,   forKey: "tvAuthUser")
+        defaults.set(authPass,   forKey: "tvAuthPass")
 
         WidgetCenter.shared.reloadAllTimelines()
         print("[TvConfigHandler] Saved config — ip:\(ip) port:\(port) apiVersion:\(apiVersion)")

@@ -1,7 +1,7 @@
 {
   "name": "Philips TV Remote",
   "short_name": "TV Remote",
-  "description": "Remote control for Philips 6158 TV",
+  "description": "Remote control for Philips Smart TV (JointSpace API v1/v5/v6)",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",

@@ -10,6 +10,8 @@ private enum TvConfig {
         let ip: String
         let port: Int
         let apiVersion: Int
+        let authUser: String
+        let authPass: String
     }
 
     static func load() -> Config? {
@@ -21,11 +23,15 @@ private enum TvConfig {
 
         let port = defaults.integer(forKey: "tvPort")
         let apiVersion = defaults.integer(forKey: "tvApiVersion")
+        let authUser = defaults.string(forKey: "tvAuthUser") ?? ""
+        let authPass = defaults.string(forKey: "tvAuthPass") ?? ""
 
         return Config(
             ip: ip,
             port: port > 0 ? port : 1925,
-            apiVersion: apiVersion > 0 ? apiVersion : 1
+            apiVersion: apiVersion > 0 ? apiVersion : 1,
+            authUser: authUser,
+            authPass: authPass
         )
     }
 }
@@ -34,9 +40,21 @@ private enum TvConfig {
 
 private enum TvSender {
 
-    /// URLSessionDelegate that accepts self-signed certificates from RFC-1918 hosts only.
+    /// URLSession delegate that:
+    /// 1. Accepts self-signed TLS certificates from RFC-1918 hosts (v6 HTTPS TVs).
+    /// 2. Provides Digest credentials when the TV returns HTTP 401.
+    ///
     /// Defined inside enum namespace to avoid AppIntentsSSUTraining build failures.
-    private final class LocalNetworkDelegate: NSObject, URLSessionDelegate {
+    private final class LocalNetworkDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
+        private let authUser: String
+        private let authPass: String
+
+        init(authUser: String, authPass: String) {
+            self.authUser = authUser
+            self.authPass = authPass
+        }
+
+        // SSL: accept self-signed certificate for RFC-1918 hosts only
         func urlSession(
             _ session: URLSession,
             didReceive challenge: URLAuthenticationChallenge,
@@ -52,6 +70,33 @@ private enum TvSender {
             completionHandler(.useCredential, URLCredential(trust: trust))
         }
 
+        // HTTP auth: respond to Digest (and Basic) challenges with stored credentials
+        func urlSession(
+            _ session: URLSession,
+            task: URLSessionTask,
+            didReceive challenge: URLAuthenticationChallenge,
+            completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+        ) {
+            let method = challenge.protectionSpace.authenticationMethod
+            guard method == NSURLAuthenticationMethodHTTPDigest ||
+                  method == NSURLAuthenticationMethodHTTPBasic
+            else {
+                completionHandler(.performDefaultHandling, nil)
+                return
+            }
+            // Cancel after first failure to avoid infinite retry loop
+            if challenge.previousFailureCount > 0 {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+                return
+            }
+            guard !authUser.isEmpty else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+                return
+            }
+            completionHandler(.useCredential,
+                URLCredential(user: authUser, password: authPass, persistence: .forSession))
+        }
+
         private func isPrivateHost(_ host: String) -> Bool {
             let privateRanges = ["10.", "192.168.", "172.16.", "172.17.", "172.18.", "172.19.",
                                  "172.20.", "172.21.", "172.22.", "172.23.", "172.24.", "172.25.",
@@ -59,11 +104,6 @@ private enum TvSender {
             return privateRanges.contains(where: { host.hasPrefix($0) })
         }
     }
-
-    private static let localSession: URLSession = {
-        let delegate = LocalNetworkDelegate()
-        return URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
-    }()
 
     static func sendKey(_ key: String) async throws {
         guard let config = TvConfig.load() else {
@@ -81,7 +121,11 @@ private enum TvSender {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(["key": key])
 
-        let (_, response) = try await localSession.data(for: request)
+        // Create session per-request so credentials are always current
+        let delegate = LocalNetworkDelegate(authUser: config.authUser, authPass: config.authPass)
+        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+
+        let (_, response) = try await session.data(for: request)
 
         guard let http = response as? HTTPURLResponse,
               (200...299).contains(http.statusCode) else {

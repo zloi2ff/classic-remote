@@ -1495,12 +1495,11 @@
 
         // apiFetch: automatically chooses digestFetch for v6, plain fetch otherwise.
         // All TV command functions (sendKey, setVolume, etc.) should call this instead of fetch().
+        // For v6 + Capacitor: always use digestFetch — it handles the 401 challenge internally
+        // and returns the 401 response gracefully when credentials aren't stored yet.
         function apiFetch(url, options = {}) {
             const version = parseInt(localStorage.getItem('tvApiVersion') || '1');
-            if (version >= 6 && IS_CAPACITOR) {
-                const ip = localStorage.getItem('tvIp');
-                if (ip && _getTvCredentials(ip)) return digestFetch(url, options);
-            }
+            if (version >= 6 && IS_CAPACITOR) return digestFetch(url, options);
             return fetch(url, options);
         }
 
@@ -1713,10 +1712,13 @@
             // TvConfigHandler.swift registered via CAPBridgeViewController.webView in AppDelegate.
             if (IS_CAPACITOR) {
                 try {
+                    const cred = (apiVersion || 1) >= 6 ? _getTvCredentials(ip) : null;
                     window.webkit.messageHandlers.tvConfig.postMessage({
                         ip,
                         port: port || 1925,
                         apiVersion: apiVersion || 1,
+                        authUser: cred?.user ?? '',
+                        authPass: cred?.pass ?? '',
                     });
                     console.log('[saveConfig] tvConfig message sent');
                 } catch (e) {
@@ -1907,23 +1909,23 @@
         }
 
         // After connecting: show "Connecting...", wait for CapacitorHttp pool to clear
-        // (scan leaves ~250 in-flight requests), then load capabilities with retries.
+        // (scan leaves ~250 in-flight requests), then confirm TV is reachable with retries.
         async function _postConnectLoad() {
             showStatus('connecting', 'Connecting...');
             // Give CapacitorHttp URLSession pool time to drain after subnet scan
             await new Promise(r => setTimeout(r, 1500));
-            await loadTvCapabilities();
-            // Retry getVolume up to 5× with 2s intervals if first attempt fails
+            // Retry getVolume up to 5× with 2s intervals until TV responds
             let attempts = 0;
             const tryConnect = async () => {
                 try {
                     const r = await apiFetch(`${getApiBase()}/audio/volume`);
                     if (r.ok) {
                         const d = await r.json();
-                        document.getElementById('volumeSlider').value = d.current ?? d.current;
+                        document.getElementById('volumeSlider').value = d.current ?? 0;
                         document.getElementById('volumeValue').textContent = d.current ?? '';
                         showStatus('connected', 'Connected');
                         startPolling();
+                        loadTvCapabilities(); // fire-and-forget: update slider range + sources
                         return;
                     }
                 } catch {}
@@ -1949,9 +1951,19 @@
             const inputId = context === 'setup' ? 'setupIpInput' : 'manualIpInput';
             const ip = document.getElementById(inputId).value.trim();
             if (!ip) return;
+            if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+                alert('Please enter a valid IP address (e.g. 192.168.1.100)');
+                return;
+            }
 
-            // Auto-detect API version by probing the TV directly
-            const detected = IS_CAPACITOR ? await probeTvDirect(ip) : null;
+            // Auto-detect API version by probing the TV directly (iOS) or via server (browser)
+            let detected = IS_CAPACITOR ? await probeTvDirect(ip) : null;
+            if (!detected && !IS_CAPACITOR) {
+                try {
+                    const r = await fetch(`/probe?ip=${encodeURIComponent(ip)}`);
+                    if (r.ok) detected = await r.json();
+                } catch {}
+            }
             const port       = detected?.port       || 1925;
             const apiVersion = detected?.apiVersion || 1;
             const name       = detected?.name       || 'Philips TV';
@@ -2080,7 +2092,7 @@
                     await new Promise(r => setTimeout(r, 300));
                     response = await doSend();
                 }
-                showStatus(response.ok ? 'connected' : 'error', response.ok ? key : 'Error');
+                showStatus(response.ok ? 'connected' : 'error', response.ok ? 'Connected' : 'Error');
             } catch {
                 showStatus('error', 'Offline');
             }
