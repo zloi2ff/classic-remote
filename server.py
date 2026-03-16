@@ -12,10 +12,9 @@ import http.server
 import ipaddress
 import json
 import os
-import random
+import secrets
 import socket
 import ssl
-import string
 import threading
 import time
 import urllib.request
@@ -270,7 +269,7 @@ def _proxy_with_digest(url: str, method: str, body: bytes | None,
             return resp.read()
 
     # Step 2 — retry with Digest Authorization
-    cnonce     = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+    cnonce     = secrets.token_hex(8)
     auth_value = _build_digest_header(method, uri, user, password, www_auth, 1, cnonce)
     req2 = urllib.request.Request(url, data=body, method=method)
     req2.add_header('Content-Type',  'application/json')
@@ -315,12 +314,13 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     # Response helpers
     # ------------------------------------------------------------------
 
-    def _send_json(self, data: dict, status: int = 200) -> None:
+    def _send_json(self, data: dict, status: int = 200, cors: bool = False) -> None:
         body = json.dumps(data).encode()
         self.send_response(status)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Content-Length', len(body))
-        self.send_header('Access-Control-Allow-Origin', '*')
+        if cors:
+            self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         self.wfile.write(body)
 
@@ -475,7 +475,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         if not tv_config['ip']:
             self._send_json({
                 'error': 'TV not configured. Use discovery or set IP manually.'
-            }, 503)
+            }, 503, cors=True)
             return
 
         # v6+ uses HTTPS; older models use plain HTTP
@@ -514,7 +514,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(error_body)
         except Exception as e:
             print(f"[proxy] TV request failed: {e}")
-            self._send_json({'error': 'TV unreachable'}, 502)
+            self._send_json({'error': 'TV unreachable'}, 502, cors=True)
 
     def log_message(self, format, *args):
         print(f"[{self.log_date_time_string()}] {format % args}")

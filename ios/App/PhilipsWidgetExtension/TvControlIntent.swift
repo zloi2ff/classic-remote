@@ -14,11 +14,22 @@ private enum TvConfig {
         let authPass: String
     }
 
+    /// Validate RFC-1918 private IPv4 (widget can't reference TvConfigHandler from main target).
+    private static func isPrivateIPv4(_ ip: String) -> Bool {
+        let parts = ip.split(separator: ".", omittingEmptySubsequences: false)
+        guard parts.count == 4, parts.allSatisfy({ UInt8($0) != nil }) else { return false }
+        let ranges = ["10.", "192.168.", "172.16.", "172.17.", "172.18.", "172.19.",
+                       "172.20.", "172.21.", "172.22.", "172.23.", "172.24.", "172.25.",
+                       "172.26.", "172.27.", "172.28.", "172.29.", "172.30.", "172.31."]
+        return ranges.contains(where: { ip.hasPrefix($0) })
+    }
+
     static func load() -> Config? {
         guard
             let defaults = UserDefaults(suiteName: appGroupID),
             let ip = defaults.string(forKey: "tvIp"),
-            !ip.isEmpty
+            !ip.isEmpty,
+            isPrivateIPv4(ip)
         else { return nil }
 
         let port = defaults.integer(forKey: "tvPort")
