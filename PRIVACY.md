@@ -43,4 +43,5 @@ This app does not knowingly collect data from children under 13.
 
 ## Contact
 
-For questions or concerns: https://github.com/zloi2ff/philips-remote/issues
+Email: kultura.des@gmail.com
+GitHub: https://github.com/zloi2ff/philips-remote/issues
