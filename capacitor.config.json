@@ -1,6 +1,6 @@
 {
   "appId": "com.philips.remote",
-  "appName": "Philips Remote",
+  "appName": "Classic Remote",
   "webDir": "www",
   "plugins": {
     "CapacitorHttp": {

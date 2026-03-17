@@ -1,10 +1,10 @@
-# Privacy Policy — Philips Remote
+# Privacy Policy — Classic Remote
 
 **Last updated:** March 2026
 
 ## What data we collect
 
-Philips Remote does **not** collect, store, or transmit any personal data to external servers.
+Classic Remote does **not** collect, store, or transmit any personal data to external servers.
 
 All TV control commands are sent directly from your device to your Philips TV on your local network. No data leaves your home network.
 

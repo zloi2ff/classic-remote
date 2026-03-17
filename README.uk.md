@@ -1,4 +1,4 @@
-<h1 align="center">Philips TV Remote</h1>
+<h1 align="center">Classic Remote</h1>
 
 <p align="center">
   Веб-пульт для телевізора Philips Smart TV — працює у браузері, як PWA та нативний iOS-додаток з віджетом на домашньому екрані.
@@ -215,7 +215,7 @@ ssh user@192.168.1.10 "sudo systemctl restart philips-remote"
 
 ```ini
 [Unit]
-Description=Philips TV Remote
+Description=Classic Remote
 After=network.target
 
 [Service]

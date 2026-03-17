@@ -202,7 +202,7 @@ private struct WidgetHeader: View {
             Image(systemName: "tv")
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(Design.accent)
-            Text("PHILIPS REMOTE")
+            Text("CLASSIC REMOTE")
                 .font(.system(size: 8, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .tracking(1)
@@ -301,7 +301,7 @@ struct PhilipsWidget: Widget {
                     .containerBackground(Design.bgPrimary, for: .widget)
             }
         }
-        .configurationDisplayName("Philips TV Remote")
+        .configurationDisplayName("Classic Remote")
         .description("Control volume and power from your Home Screen.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }

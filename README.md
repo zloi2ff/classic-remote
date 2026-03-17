@@ -1,4 +1,4 @@
-<h1 align="center">Philips TV Remote</h1>
+<h1 align="center">Classic Remote</h1>
 
 <p align="center">
   Web-based remote control for Philips Smart TV — works as a browser app, PWA, and native iOS app with a Home Screen widget.
@@ -215,7 +215,7 @@ Example systemd unit:
 
 ```ini
 [Unit]
-Description=Philips TV Remote
+Description=Classic Remote
 After=network.target
 
 [Service]

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
-    <title>Philips Remote</title>
+    <title>Classic Remote</title>
 
     <!-- PWA / iOS -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -731,7 +731,7 @@
 
     <!-- Setup Screen (shown when no TV configured) -->
     <div class="setup-screen" id="setupScreen">
-        <h1>Philips Remote</h1>
+        <h1>Classic Remote</h1>
         <p>Find your TV on the network or enter IP manually</p>
         <p style="font-size:12px;color:var(--text-secondary);margin:-16px 0 24px 0;">
             ⚠️ Make sure your phone is connected to the <strong>2.4 GHz</strong> Wi-Fi network — Philips TVs are only visible on 2.4 GHz.
@@ -972,7 +972,7 @@
 
             <!-- Pro -->
             <div class="settings-section">
-                <div class="settings-section-label">Philips Remote Pro</div>
+                <div class="settings-section-label">Classic Remote Pro</div>
                 <div class="settings-card">
                     <div class="settings-row">
                         <div class="settings-row-icon">✨</div>
@@ -1083,7 +1083,7 @@
 
         const MONETIZATION = {
             admobBannerId:  'ca-app-pub-3940256099942544/2934735716', // ← replace: AdMob Banner Unit ID (see RELEASE_CHECKLIST.md)
-            rcApiKeyIos:    'appl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',  // ← replace: RevenueCat iOS API key
+            rcApiKeyIos:    'test_tYhjwyNsOGueqEdStQKnwwSpUzw',       // RevenueCat iOS API key (test mode)
             entitlementId:  'pro',                                    // RevenueCat entitlement name — keep as-is
             productId:      'remove_ads',                             // App Store Connect IAP product ID — keep as-is
             appStoreId:     'XXXXXXXXXX',                             // ← replace: numeric App Store ID (after first submission)
@@ -1531,9 +1531,9 @@
             const body = {
                 device: {
                     app_id:      'com.philips.remote',
-                    app_name:    'Philips Remote',
+                    app_name:    'Classic Remote',
                     device_id:   deviceId,
-                    device_name: 'Philips Remote iOS',
+                    device_name: 'Classic Remote iOS',
                     type:        'native',
                 },
                 scope: ['read', 'write', 'control'],
@@ -1561,9 +1561,9 @@
                 },
                 device: {
                     app_id:      'com.philips.remote',
-                    app_name:    'Philips Remote',
+                    app_name:    'Classic Remote',
                     device_id:   deviceId,
-                    device_name: 'Philips Remote iOS',
+                    device_name: 'Classic Remote iOS',
                     type:        'native',
                 },
             };
