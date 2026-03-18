@@ -75,7 +75,7 @@
 
         <h2>What data we collect</h2>
         <p>Classic Remote does <strong>not</strong> collect, store, or transmit any personal data to external servers.</p>
-        <p>All TV control commands are sent directly from your device to your Philips TV on your local network. No data leaves your home network.</p>
+        <p>All TV control commands are sent directly from your device to your Philips TV on your local network. No TV control data leaves your home network. Third-party services described below may transmit data to their servers.</p>
 
         <h2>Advertising (free version)</h2>
         <p>The free version displays banner ads provided by <strong>Google AdMob</strong>. AdMob may collect:</p>
@@ -89,14 +89,22 @@
 
         <h2>In-App Purchase</h2>
         <p>The "Remove Ads" purchase is processed by <strong>Apple App Store</strong>. We do not have access to your payment information.</p>
-        <p>Purchase status is verified locally on your device using <strong>RevenueCat</strong>, which stores only anonymous purchase receipts. RevenueCat does not collect personal data.</p>
+        <p>Purchase status is verified using <strong>RevenueCat</strong>. RevenueCat collects pseudonymous device identifiers, IP address, and purchase receipts to verify and manage your purchase. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's privacy policy</a> for details.</p>
         <p>See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's privacy policy</a>.</p>
 
         <h2>Local network access</h2>
         <p>The app requires access to your local network to discover and control Philips TVs. This permission is requested at first launch. No network data is sent outside your local network.</p>
 
-        <h2>Data retention</h2>
-        <p>No user data is stored on our servers. TV configuration (IP address, port) is stored locally on your device only.</p>
+        <h2>Data stored on device</h2>
+        <p>No user data is stored on our servers. The app stores the following data locally on your device:</p>
+        <ul>
+            <li>TV configuration (IP address, port, API version)</li>
+            <li>TV authentication credentials for secure TV models</li>
+            <li>A unique device identifier (UUID) generated for TV pairing</li>
+            <li>Theme preference and ad removal status</li>
+        </ul>
+        <p>On iOS, TV configuration and credentials are shared with the widget extension via App Group storage to enable widget functionality.</p>
+        <p>The app uses WebRTC locally (without external servers) to detect your device's local network address for TV discovery. No data is transmitted externally during this process.</p>
 
         <h2>Children's privacy</h2>
         <p>This app does not knowingly collect data from children under 13.</p>

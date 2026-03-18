@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
@@ -54,7 +54,7 @@
             --border-subtle:  rgba(0,0,0,0.05);
             --text-primary:   #000000;
             --text-secondary: #6c6c70;
-            --text-muted:     #aeaeb2;
+            --text-muted:     #8e8e93;
             --accent:         #007aff;
             --accent-dark:    #0062cc;
             --btn-from:       #e5e5ea;
@@ -75,7 +75,7 @@
                 --border-subtle:  rgba(0,0,0,0.05);
                 --text-primary:   #000000;
                 --text-secondary: #6c6c70;
-                --text-muted:     #aeaeb2;
+                --text-muted:     #8e8e93;
                 --accent:         #007aff;
                 --accent-dark:    #0062cc;
                 --btn-from:       #e5e5ea;
@@ -119,6 +119,7 @@
         .page {
             display: none;
             width: 100%;
+            height: 100vh;
             height: 100dvh;
             max-height: 100dvh;
             overflow-y: hidden;
@@ -202,8 +203,8 @@
             justify-content: center;
         }
 
-        .btn:active,
-        .btn.flash {
+        .btn:not(.power):active,
+        .btn:not(.power).flash {
             transform: scale(0.92);
             background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%) !important;
         }
@@ -226,6 +227,8 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
         }
+
+        .btn:focus-visible, .discover-btn:focus-visible, .seg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
         /* Volume */
         .volume-row { margin-bottom: 12px; }
@@ -256,6 +259,9 @@
             border-radius: 50%;
             cursor: pointer;
         }
+
+        input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; }
+        input[type="range"]::-moz-range-track { background: var(--bg-tertiary); height: 4px; border-radius: 2px; }
 
         .volume-slider span { color: var(--text-secondary); font-size: 12px; }
 
@@ -341,7 +347,7 @@
         }
 
         .page.expanded .expand-btn { margin-top: 12px; }
-        .expand-btn:active { background: rgba(255,255,255,0.06); }
+        .expand-btn:active { background: rgba(128,128,128,0.15); }
         .expand-btn .arrow { transition: transform 0.3s; font-size: 10px; }
         .expand-btn.expanded .arrow { transform: rotate(180deg); }
 
@@ -633,7 +639,7 @@
         .settings-row:last-child { border-bottom: none; }
 
         .settings-row-tappable { cursor: pointer; }
-        .settings-row-tappable:active { background: rgba(255,255,255,0.05); }
+        .settings-row-tappable:active { background: rgba(128,128,128,0.15); }
 
         .settings-row-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
 
@@ -720,11 +726,12 @@
         .spinner {
             display: inline-block;
             width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            border: 2px solid var(--text-muted);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     </style>
 </head>
 <body>
@@ -760,16 +767,16 @@
     <div class="page active" id="tvPage">
         <div class="main-content">
             <div class="top-header">
-                <button class="btn power" onclick="sendKey('Standby')">
+                <button class="btn power" aria-label="Power" onclick="sendKey('Standby')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M12 2v10M18.4 6.6a9 9 0 1 1-12.8 0"/>
                     </svg>
                 </button>
                 <div class="header-center">
                     <h1 id="tvTitle">PHILIPS TV</h1>
-                    <div id="tvStatus" class="status connected">Connected</div>
+                    <div id="tvStatus" class="status connected" role="status" aria-live="polite">Connected</div>
                 </div>
-                <button class="btn settings-btn" onclick="openSettingsPage()">
+                <button class="btn settings-btn" aria-label="Settings" onclick="openSettingsPage()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -780,7 +787,7 @@
             <div class="volume-row">
                 <div class="volume-slider">
                     <span>🔈</span>
-                    <input type="range" id="volumeSlider" min="0" max="60" value="30" onchange="setVolume(this.value)">
+                    <input type="range" id="volumeSlider" min="0" max="60" value="30" aria-label="Volume" onchange="setVolume(this.value)">
                     <span class="volume-value" id="volumeValue">30</span>
                 </div>
             </div>
@@ -794,30 +801,30 @@
             <div class="main-controls">
                 <div class="side-controls">
                     <div class="label">Vol</div>
-                    <button class="btn" onclick="sendKey('VolumeUp')">+</button>
+                    <button class="btn" aria-label="Volume up" onclick="sendKey('VolumeUp')">+</button>
                     <button class="btn mute" onclick="sendKey('Mute')">MUTE</button>
-                    <button class="btn" onclick="sendKey('VolumeDown')">−</button>
+                    <button class="btn" aria-label="Volume down" onclick="sendKey('VolumeDown')">−</button>
                 </div>
 
                 <div class="dpad-container">
                     <div class="dpad">
                         <div class="empty"></div>
-                        <button class="btn" onclick="sendKey('CursorUp')">▲</button>
+                        <button class="btn" aria-label="Up" onclick="sendKey('CursorUp')">▲</button>
                         <div class="empty"></div>
-                        <button class="btn" onclick="sendKey('CursorLeft')">◀</button>
-                        <button class="btn ok" onclick="sendKey('Confirm')">OK</button>
-                        <button class="btn" onclick="sendKey('CursorRight')">▶</button>
+                        <button class="btn" aria-label="Left" onclick="sendKey('CursorLeft')">◀</button>
+                        <button class="btn ok" aria-label="OK" onclick="sendKey('Confirm')">OK</button>
+                        <button class="btn" aria-label="Right" onclick="sendKey('CursorRight')">▶</button>
                         <div class="empty"></div>
-                        <button class="btn" onclick="sendKey('CursorDown')">▼</button>
+                        <button class="btn" aria-label="Down" onclick="sendKey('CursorDown')">▼</button>
                         <div class="empty"></div>
                     </div>
                 </div>
 
                 <div class="side-controls">
                     <div class="label">Ch</div>
-                    <button class="btn" onclick="sendKey('ChannelStepUp')">+</button>
+                    <button class="btn" aria-label="Channel up" onclick="sendKey('ChannelStepUp')">+</button>
                     <button class="btn mute" onclick="sendKey('Info')">INFO</button>
-                    <button class="btn" onclick="sendKey('ChannelStepDown')">−</button>
+                    <button class="btn" aria-label="Channel down" onclick="sendKey('ChannelStepDown')">−</button>
                 </div>
             </div>
 
@@ -828,7 +835,7 @@
             </div>
         </div>
 
-        <button class="expand-btn" id="tvExpandBtn" onclick="toggleExpand('tv')">
+        <button class="expand-btn" id="tvExpandBtn" aria-expanded="false" onclick="toggleExpand('tv')">
             <span>More controls</span>
             <span class="arrow">▼</span>
         </button>
@@ -838,10 +845,10 @@
                 <div class="section">
                     <div class="section-title">Playback</div>
                     <div class="playback-row">
-                        <button class="btn" onclick="sendKey('Rewind')">⏪</button>
-                        <button class="btn" onclick="sendKey('Play')">▶</button>
-                        <button class="btn" onclick="sendKey('Pause')">⏸</button>
-                        <button class="btn" onclick="sendKey('FastForward')">⏩</button>
+                        <button class="btn" aria-label="Rewind" onclick="sendKey('Rewind')">⏪</button>
+                        <button class="btn" aria-label="Play" onclick="sendKey('Play')">▶</button>
+                        <button class="btn" aria-label="Pause" onclick="sendKey('Pause')">⏸</button>
+                        <button class="btn" aria-label="Fast forward" onclick="sendKey('FastForward')">⏩</button>
                     </div>
                     <div class="playback-row2">
                         <button class="btn" onclick="sendKey('Stop')">⏹ Stop</button>
@@ -865,17 +872,17 @@
                 </div>
 
                 <div class="color-row">
-                    <button class="btn color-red"    onclick="sendKey('RedColour')"></button>
-                    <button class="btn color-green"  onclick="sendKey('GreenColour')"></button>
-                    <button class="btn color-yellow" onclick="sendKey('YellowColour')"></button>
-                    <button class="btn color-blue"   onclick="sendKey('BlueColour')"></button>
+                    <button class="btn color-red"    aria-label="Red" onclick="sendKey('RedColour')"></button>
+                    <button class="btn color-green"  aria-label="Green" onclick="sendKey('GreenColour')"></button>
+                    <button class="btn color-yellow" aria-label="Yellow" onclick="sendKey('YellowColour')"></button>
+                    <button class="btn color-blue"   aria-label="Blue" onclick="sendKey('BlueColour')"></button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- TV Discovery Modal (used from Settings too) -->
-    <div class="modal-overlay" id="tvModal">
+    <div class="modal-overlay" id="tvModal" role="dialog" aria-modal="true">
         <div class="modal">
             <h2>Change TV</h2>
 
@@ -894,7 +901,7 @@
 
             <div class="divider">or enter TV IP manually</div>
 
-            <label>TV IP Address</label>
+            <label for="manualIpInput">TV IP Address</label>
             <input type="text" id="manualIpInput" placeholder="192.168.1.100" inputmode="decimal">
 
             <div class="modal-buttons">
@@ -905,16 +912,16 @@
     </div>
 
     <!-- PIN Pairing Modal (shown when v6 TV requires pairing) -->
-    <div class="modal-overlay" id="pairModal">
+    <div class="modal-overlay" id="pairModal" role="dialog" aria-modal="true">
         <div class="modal">
             <h2>Pair with TV</h2>
             <p id="pairModalMsg" style="font-size:13px;color:var(--text-secondary);text-align:center;margin:-8px 0 20px 0;">
                 A PIN code will appear on your TV screen. Enter it below to complete pairing.
             </p>
-            <label>PIN Code</label>
+            <label for="pairPinInput">PIN Code</label>
             <input type="text" id="pairPinInput" placeholder="1234" inputmode="numeric"
                    maxlength="8" style="letter-spacing:4px;text-align:center;font-size:22px;">
-            <div id="pairError" style="display:none;color:var(--danger);font-size:12px;text-align:center;margin:-8px 0 12px 0;"></div>
+            <div id="pairError" role="alert" style="display:none;color:var(--danger);font-size:12px;text-align:center;margin:-8px 0 12px 0;"></div>
             <div class="modal-buttons">
                 <button class="btn" onclick="cancelPairing()">Cancel</button>
                 <button class="btn primary" id="pairBtn" onclick="submitPairing()">Pair</button>
@@ -971,7 +978,7 @@
             </div>
 
             <!-- Pro -->
-            <div class="settings-section">
+            <div class="settings-section" id="proSection">
                 <div class="settings-section-label">Classic Remote Pro</div>
                 <div class="settings-card">
                     <div class="settings-row">
@@ -1048,6 +1055,7 @@
     </div>
 
     <script>
+        'use strict';
         // ============================================================
         // THEME — must run before DOMContentLoaded to avoid flash
         // ============================================================
@@ -1196,6 +1204,7 @@
         }
 
         function syncProUI() {
+            const proSection = document.getElementById('proSection'); if (proSection && !isNative()) { proSection.style.display = 'none'; return; }
             const btn      = document.getElementById('removeAdsBtn');
             const badge    = document.getElementById('proBadge');
             const subtitle = document.getElementById('removeAdsSubtitle');
@@ -1235,7 +1244,7 @@
                     setAdsRemoved(true);
                     haptic();
                     alert('Ads removed! Thank you for your support ❤️');
-                }
+                } else { alert('Purchase completed but activation failed. Please tap Restore or contact support.'); }
             } catch (e) {
                 if (e?.code !== 'PURCHASE_CANCELLED') alert('Purchase failed. Please try again.');
             } finally {
@@ -1632,6 +1641,7 @@
                 document.getElementById('pairModal').classList.remove('active');
                 if (onSuccess) await onSuccess();
             } catch (e) {
+                localStorage.removeItem('tvAuth_' + _pairState.ip);
                 errEl.textContent = `Pairing failed: ${e.message}`;
                 errEl.style.display = 'block';
                 pairBtn.disabled = false;
@@ -1900,6 +1910,7 @@
             // v6 TVs require Digest Auth. If credentials are missing, start pairing.
             if (IS_CAPACITOR && apiVersion >= 6 && !_getTvCredentials(ip)) {
                 await startPairing(ip, port, async () => {
+                    await saveConfig(ip, port, apiVersion);
                     await _postConnectLoad();
                 });
                 return;
@@ -1913,7 +1924,7 @@
         async function _postConnectLoad() {
             showStatus('connecting', 'Connecting...');
             // Give CapacitorHttp URLSession pool time to drain after subnet scan
-            await new Promise(r => setTimeout(r, 1500));
+            if (IS_CAPACITOR) await new Promise(r => setTimeout(r, 1500));
             // Retry getVolume up to 5× with 2s intervals until TV responds
             let attempts = 0;
             const tryConnect = async () => {
@@ -2071,6 +2082,7 @@
             btn.classList.toggle('expanded');
             content.classList.toggle('expanded');
             pageEl.classList.toggle('expanded');
+            document.querySelector('.expand-btn').setAttribute('aria-expanded', content.classList.contains('expanded'));
             btn.querySelector('span:first-child').textContent =
                 content.classList.contains('expanded') ? 'Less controls' : 'More controls';
         }

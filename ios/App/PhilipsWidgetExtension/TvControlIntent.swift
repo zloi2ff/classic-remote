@@ -137,11 +137,25 @@ private enum TvSender {
         let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
 
-        let (_, response) = try await session.data(for: request)
+        let response: URLResponse
+        do {
+            (_, response) = try await session.data(for: request)
+        } catch let error as URLError {
+            switch error.code {
+            case .timedOut:            throw TvError.requestFailed("TV not responding")
+            case .cannotConnectToHost: throw TvError.requestFailed("Cannot reach TV")
+            default:                   throw TvError.requestFailed("Network error")
+            }
+        }
 
-        guard let http = response as? HTTPURLResponse,
-              (200...299).contains(http.statusCode) else {
-            throw TvError.requestFailed
+        guard let http = response as? HTTPURLResponse else {
+            throw TvError.requestFailed()
+        }
+        if http.statusCode == 401 {
+            throw TvError.requestFailed("Authentication failed. Reconfigure in app.")
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw TvError.requestFailed("TV returned error \(http.statusCode)")
         }
     }
 }
@@ -149,13 +163,13 @@ private enum TvSender {
 private enum TvError: LocalizedError {
     case notConfigured
     case invalidURL
-    case requestFailed
+    case requestFailed(String = "TV did not respond.")
 
     var errorDescription: String? {
         switch self {
-        case .notConfigured: return "TV not configured. Open app to set up."
-        case .invalidURL:    return "Invalid TV address."
-        case .requestFailed: return "TV did not respond."
+        case .notConfigured:         return "TV not configured. Open app to set up."
+        case .invalidURL:            return "Invalid TV address."
+        case .requestFailed(let msg): return msg
         }
     }
 }

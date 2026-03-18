@@ -39,7 +39,11 @@ struct PhilipsProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PhilipsEntry) -> Void) {
-        completion(makeEntry())
+        if context.isPreview {
+            completion(PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true))
+        } else {
+            completion(makeEntry())
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PhilipsEntry>) -> Void) {

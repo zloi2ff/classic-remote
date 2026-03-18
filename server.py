@@ -12,11 +12,14 @@ import http.server
 import ipaddress
 import json
 import os
+import re
 import secrets
 import socket
 import ssl
+import sys
 import threading
 import time
+import urllib.parse
 import urllib.request
 import urllib.error
 
@@ -25,20 +28,48 @@ API_PREFIX = '/api'
 JOINTSPACE_PORT = 1925
 TV_REQUEST_TIMEOUT = 5  # seconds
 SCAN_TIMEOUT = 1         # seconds per host during network scan
+MAX_BODY_SIZE = 65536    # max request body size (64 KB)
 
 # Configuration via environment variables
-SERVER_PORT = int(os.environ.get('SERVER_PORT', '8888'))
+try:
+    SERVER_PORT = int(os.environ.get('SERVER_PORT', '8888'))
+    if not (1 <= SERVER_PORT <= 65535):
+        raise ValueError
+except ValueError:
+    print("ERROR: SERVER_PORT must be an integer between 1 and 65535")
+    sys.exit(1)
 
 # Optional API token for authentication. If not set, server runs without auth
 # (backward compatible) but prints a warning at startup.
 API_TOKEN: str = os.environ.get('API_TOKEN', '')
 
 # Mutable TV config (can be changed at runtime via /config endpoint)
+_env_tv_ip = os.environ.get('TV_IP', '')
+if _env_tv_ip and not is_valid_tv_ip(_env_tv_ip):
+    print(f"WARNING: TV_IP '{_env_tv_ip}' is not a valid RFC-1918 address — ignoring")
+    _env_tv_ip = ''
+
+try:
+    _env_tv_port = int(os.environ.get('TV_PORT', str(JOINTSPACE_PORT)))
+    if not (1 <= _env_tv_port <= 65535):
+        raise ValueError
+except ValueError:
+    print("ERROR: TV_PORT must be an integer between 1 and 65535")
+    sys.exit(1)
+
+_env_tv_api = int(os.environ.get('TV_API_VERSION', '1'))
+if _env_tv_api not in (1, 5, 6):
+    print("ERROR: TV_API_VERSION must be 1, 5, or 6")
+    sys.exit(1)
+
 tv_config = {
-    'ip':         os.environ.get('TV_IP', ''),
-    'port':       int(os.environ.get('TV_PORT', str(JOINTSPACE_PORT))),
-    'apiVersion': int(os.environ.get('TV_API_VERSION', '1')),
+    'ip':         _env_tv_ip,
+    'port':       _env_tv_port,
+    'apiVersion': _env_tv_api,
 }
+
+# Lock for thread-safe access to tv_config and _tv_credentials
+_config_lock = threading.Lock()
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WWW_DIR    = os.path.join(SCRIPT_DIR, 'www')
@@ -59,10 +90,16 @@ _PRIVATE_NETWORKS = [
 
 # Security headers added to every response
 _SECURITY_HEADERS = [
-    ('X-Content-Type-Options', 'nosniff'),
-    ('X-Frame-Options',        'DENY'),
-    ('Referrer-Policy',        'no-referrer'),
+    ('X-Content-Type-Options',  'nosniff'),
+    ('X-Frame-Options',         'DENY'),
+    ('Referrer-Policy',         'no-referrer'),
+    ('Permissions-Policy',      'camera=(), microphone=(), geolocation=()'),
+    ('Content-Security-Policy', "default-src 'self'; script-src 'unsafe-inline'; "
+                                "style-src 'unsafe-inline'; connect-src *; img-src 'self' data:"),
 ]
+
+# Shared SSL context (thread-safe, reused across all HTTPS requests)
+_SHARED_SSL_CTX = _ssl_context()
 
 
 def is_valid_tv_ip(ip: str) -> bool:
@@ -126,7 +163,7 @@ def check_tv(ip: str, port: int, timeout: int = SCAN_TIMEOUT) -> dict | None:
         try:
             url = f"{scheme}://{ip}:{probe_port}/{api_version}/system"
             req = urllib.request.Request(url)
-            ctx = _ssl_context() if scheme == 'https' else None
+            ctx = _SHARED_SSL_CTX if scheme == 'https' else None
             with urllib.request.urlopen(req, timeout=timeout, context=ctx) as response:
                 data = json.loads(response.read())
                 return {
@@ -181,8 +218,6 @@ def _build_digest_header(method: str, uri: str, user: str, password: str,
     Returns:
         Full value for the Authorization header (without 'Authorization: ' prefix).
     """
-    import re
-
     def _extract(field: str) -> str:
         m = re.search(rf'{field}="([^"]*)"', www_auth)
         return m.group(1) if m else ''
@@ -239,9 +274,7 @@ def _proxy_with_digest(url: str, method: str, body: bytes | None,
         urllib.error.HTTPError: if the authenticated request still fails
         Exception: on network / SSL errors
     """
-    from urllib.parse import urlparse
-
-    parsed   = urlparse(url)
+    parsed   = urllib.parse.urlparse(url)
     uri      = parsed.path + (('?' + parsed.query) if parsed.query else '')
     user     = creds['user']
     password = creds['pass']
@@ -250,23 +283,14 @@ def _proxy_with_digest(url: str, method: str, body: bytes | None,
     req1 = urllib.request.Request(url, data=body, method=method)
     req1.add_header('Content-Type', 'application/json')
     try:
-        with urllib.request.urlopen(req1, timeout=TV_REQUEST_TIMEOUT, context=ctx):
-            pass  # 200 without auth — no digest needed, re-fetch below
+        with urllib.request.urlopen(req1, timeout=TV_REQUEST_TIMEOUT, context=ctx) as resp:
+            return resp.read()  # 200 without auth — return directly
     except urllib.error.HTTPError as e:
         if e.code != 401:
             raise
         www_auth = e.headers.get('WWW-Authenticate', '')
         if not www_auth.lower().startswith('digest'):
             raise
-    else:
-        www_auth = ''  # no challenge; fall through to plain request
-
-    if not www_auth:
-        # TV responded 200 on first try — just redo the request normally
-        req2 = urllib.request.Request(url, data=body, method=method)
-        req2.add_header('Content-Type', 'application/json')
-        with urllib.request.urlopen(req2, timeout=TV_REQUEST_TIMEOUT, context=ctx) as resp:
-            return resp.read()
 
     # Step 2 — retry with Digest Authorization
     cnonce     = secrets.token_hex(8)
@@ -314,18 +338,25 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     # Response helpers
     # ------------------------------------------------------------------
 
-    def _send_json(self, data: dict, status: int = 200, cors: bool = False) -> None:
+    def _send_json(self, data: dict, status: int = 200, cors: bool = False,
+                   no_store: bool = False) -> None:
         body = json.dumps(data).encode()
         self.send_response(status)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Content-Length', len(body))
         if cors:
             self.send_header('Access-Control-Allow-Origin', '*')
+        if no_store:
+            self.send_header('Cache-Control', 'no-store')
         self.end_headers()
         self.wfile.write(body)
 
     def _read_body(self) -> bytes:
-        content_length = int(self.headers.get('Content-Length', 0))
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+        except (ValueError, TypeError):
+            return b''
+        content_length = min(content_length, MAX_BODY_SIZE)
         return self.rfile.read(content_length)
 
     # ------------------------------------------------------------------
@@ -368,9 +399,10 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_OPTIONS(self) -> None:
         self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-API-Token')
+        if self.path.startswith(API_PREFIX + '/'):
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-API-Token')
         self.end_headers()
 
     # ------------------------------------------------------------------
@@ -394,7 +426,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({'error': 'Cannot determine local network', 'tvs': []}, 500)
                 return
             tvs = scan_network(subnet)
-            self._send_json({'tvs': tvs})
+            self._send_json({'tvs': tvs}, no_store=True)
         finally:
             _discover_lock.release()
 
@@ -418,7 +450,9 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def _handle_get_config(self) -> None:
         """Return current TV configuration."""
-        self._send_json(tv_config)
+        with _config_lock:
+            result = dict(tv_config)
+        self._send_json(result, no_store=True)
 
     def _handle_set_config(self) -> None:
         """Update TV configuration at runtime."""
@@ -428,43 +462,45 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({'error': 'Invalid JSON'}, 400)
             return
 
-        if 'ip' in body:
-            ip = str(body['ip'])
-            if not is_valid_tv_ip(ip):
-                self._send_json({'error': 'Invalid TV IP address'}, 400)
-                return
-            tv_config['ip'] = ip
+        with _config_lock:
+            if 'ip' in body:
+                ip = str(body['ip'])
+                if not is_valid_tv_ip(ip):
+                    self._send_json({'error': 'Invalid TV IP address'}, 400)
+                    return
+                tv_config['ip'] = ip
 
-        if 'port' in body:
-            try:
-                port = int(body['port'])
-            except (ValueError, TypeError):
-                self._send_json({'error': 'Invalid port'}, 400)
-                return
-            if not (1 <= port <= 65535):
-                self._send_json({'error': 'Port must be 1–65535'}, 400)
-                return
-            tv_config['port'] = port
-        if 'apiVersion' in body:
-            try:
-                api_version = int(body['apiVersion'])
-            except (ValueError, TypeError):
-                self._send_json({'error': 'Invalid apiVersion'}, 400)
-                return
-            if api_version not in (1, 5, 6):
-                self._send_json({'error': 'apiVersion must be 1, 5, or 6'}, 400)
-                return
-            tv_config['apiVersion'] = api_version
+            if 'port' in body:
+                try:
+                    port = int(body['port'])
+                except (ValueError, TypeError):
+                    self._send_json({'error': 'Invalid port'}, 400)
+                    return
+                if not (1 <= port <= 65535):
+                    self._send_json({'error': 'Port must be 1–65535'}, 400)
+                    return
+                tv_config['port'] = port
+            if 'apiVersion' in body:
+                try:
+                    api_version = int(body['apiVersion'])
+                except (ValueError, TypeError):
+                    self._send_json({'error': 'Invalid apiVersion'}, 400)
+                    return
+                if api_version not in (1, 5, 6):
+                    self._send_json({'error': 'apiVersion must be 1, 5, or 6'}, 400)
+                    return
+                tv_config['apiVersion'] = api_version
 
-        # Optional: store digest credentials for v6 TV proxy auth.
-        # Accepted as { "tvUser": "auth_AppId", "tvPass": "auth_key" }.
-        tv_user = body.get('tvUser', '')
-        tv_pass = body.get('tvPass', '')
-        if tv_user and tv_pass and tv_config['ip']:
-            _tv_credentials[tv_config['ip']] = {'user': str(tv_user), 'pass': str(tv_pass)}
-            print(f"[config] Stored digest credentials for {tv_config['ip']}")
+            # Optional: store digest credentials for v6 TV proxy auth.
+            tv_user = body.get('tvUser', '')
+            tv_pass = body.get('tvPass', '')
+            if tv_user and tv_pass and tv_config['ip']:
+                _tv_credentials[tv_config['ip']] = {'user': str(tv_user), 'pass': str(tv_pass)}
+                print(f"[config] Stored digest credentials for {tv_config['ip']}")
 
-        self._send_json(tv_config)
+            result = dict(tv_config)
+
+        self._send_json(result)
 
     def _proxy_tv(self, method: str) -> None:
         """Proxy an HTTP/HTTPS request to the Philips TV JointSpace API.
@@ -472,24 +508,28 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         For API v6+, automatically adds HTTP Digest Auth if credentials are
         stored (via /config tvUser/tvPass fields or in _tv_credentials).
         """
-        if not tv_config['ip']:
+        # Snapshot config under lock for thread safety
+        with _config_lock:
+            cfg = dict(tv_config)
+            creds = _tv_credentials.get(cfg['ip'])
+
+        if not cfg['ip']:
             self._send_json({
                 'error': 'TV not configured. Use discovery or set IP manually.'
             }, 503, cors=True)
             return
 
         # v6+ uses HTTPS; older models use plain HTTP
-        scheme  = 'https' if tv_config['apiVersion'] >= 6 else 'http'
+        scheme  = 'https' if cfg['apiVersion'] >= 6 else 'http'
         tv_path = self.path[len(API_PREFIX):]
-        tv_url  = f"{scheme}://{tv_config['ip']}:{tv_config['port']}{tv_path}"
-        ctx     = _ssl_context() if scheme == 'https' else None
+        tv_url  = f"{scheme}://{cfg['ip']}:{cfg['port']}{tv_path}"
+        ctx     = _SHARED_SSL_CTX if scheme == 'https' else None
 
         try:
             body = self._read_body() if method == 'POST' else None
 
             # For v6+ with stored credentials, use Digest Auth via urllib opener.
-            creds = _tv_credentials.get(tv_config['ip'])
-            if tv_config['apiVersion'] >= 6 and creds:
+            if cfg['apiVersion'] >= 6 and creds:
                 data = _proxy_with_digest(tv_url, method, body, creds, ctx)
             else:
                 req = urllib.request.Request(tv_url, data=body, method=method)
@@ -507,13 +547,13 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         except urllib.error.HTTPError as e:
             error_body = e.read()
             self.send_response(e.code)
-            self.send_header('Content-Type', e.headers.get('Content-Type', 'application/json'))
+            self.send_header('Content-Type', 'application/json')
             self.send_header('Content-Length', len(error_body))
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(error_body)
         except Exception as e:
-            print(f"[proxy] TV request failed: {e}")
+            print(f"[proxy] TV request failed: {type(e).__name__}: {e}")
             self._send_json({'error': 'TV unreachable'}, 502, cors=True)
 
     def log_message(self, format, *args):

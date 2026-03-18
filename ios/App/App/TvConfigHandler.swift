@@ -61,6 +61,8 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
         defaults.set(authPass,   forKey: "tvAuthPass")
 
         WidgetCenter.shared.reloadAllTimelines()
+        #if DEBUG
         print("[TvConfigHandler] Saved config — ip:\(ip) port:\(port) apiVersion:\(apiVersion)")
+        #endif
     }
 }

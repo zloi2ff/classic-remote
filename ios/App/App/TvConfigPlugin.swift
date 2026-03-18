@@ -14,7 +14,9 @@ public class TvConfigPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func save(_ call: CAPPluginCall) {
         let rawIp = call.getString("ip")
+        #if DEBUG
         print("[TvConfigPlugin] save called, ip=\(rawIp ?? "nil")")
+        #endif
 
         guard let ip = rawIp, !ip.isEmpty else {
             call.reject("Missing ip — received: \(String(describing: rawIp))")
@@ -37,7 +39,9 @@ public class TvConfigPlugin: CAPPlugin, CAPBridgedPlugin {
         defaults.set(apiVersion, forKey: "tvApiVersion")
 
         WidgetCenter.shared.reloadAllTimelines()
+        #if DEBUG
         print("[TvConfigPlugin] Saved ip=\(ip) port=\(port) apiVersion=\(apiVersion)")
+        #endif
         call.resolve()
     }
 }
