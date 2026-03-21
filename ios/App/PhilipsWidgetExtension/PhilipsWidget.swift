@@ -229,8 +229,8 @@ private struct WidgetHeader: View {
 
     private var meta: BrandInfo.Meta { BrandInfo.meta(for: brand) }
 
-    /// "PHILIPS REMOTE", "SONY REMOTE", etc.
-    private var title: String { "\(meta.displayName.uppercased()) REMOTE" }
+    /// "CLASSIC REMOTE · PHILIPS", "CLASSIC REMOTE · SONY", etc.
+    private var title: String { "CLASSIC REMOTE · \(meta.displayName.uppercased())" }
 
     var body: some View {
         HStack(spacing: 4) {
