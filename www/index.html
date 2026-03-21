@@ -732,16 +732,122 @@
             animation: spin 0.8s linear infinite;
         }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+        /* ============================================================
+           BRAND SELECTION
+        ============================================================ */
+        .brand-screen {
+            position: fixed; inset: 0; z-index: 200;
+            background: var(--bg-primary);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 24px; padding-top: calc(24px + env(safe-area-inset-top));
+        }
+        .brand-screen.active { display: flex; }
+        .brand-screen h1 { font-size: 22px; margin: 0 0 6px; }
+        .brand-screen > p { font-size: 13px; color: var(--text-secondary); margin: 0 0 24px; text-align: center; }
+        .brand-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 12px; width: 100%; max-width: 340px; margin-bottom: 20px;
+        }
+        .brand-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--btn-from), var(--btn-to));
+            border: 1px solid var(--border); border-radius: 14px;
+            padding: 14px 6px; cursor: pointer; transition: transform 0.1s, border-color 0.2s;
+            min-height: 80px;
+        }
+        .brand-item:active { transform: scale(0.95); }
+        .brand-item .brand-logo { font-size: 28px; margin-bottom: 6px; }
+        .brand-item .brand-name { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+        .brand-scan-all {
+            width: 100%; max-width: 340px; padding: 14px;
+            background: var(--success); color: #fff; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .brand-scan-all:active { opacity: 0.8; }
+        .brand-scan-all:disabled { opacity: 0.6; }
+
+        .brand-badge {
+            display: inline-block; font-size: 10px; padding: 2px 6px;
+            border-radius: 6px; background: var(--accent); color: #fff;
+            margin-left: 4px; vertical-align: middle;
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- Setup Screen (shown when no TV configured) -->
+    <!-- Brand Selection Screen (shown on first launch) -->
+    <div class="brand-screen" id="brandSelectScreen">
+        <h1>Classic Remote</h1>
+        <p>Choose your TV brand or scan all</p>
+
+        <button class="brand-scan-all" id="brandScanAllBtn" onclick="scanAllBrands()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/>
+                <path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
+            </svg>
+            Scan All TVs
+        </button>
+
+        <div class="tv-list" id="brandScanList" style="max-width:340px;width:100%;margin-bottom:12px;"></div>
+
+        <div class="brand-grid">
+            <div class="brand-item" onclick="selectBrand('philips')">
+                <span class="brand-logo">📺</span>
+                <span class="brand-name">Philips</span>
+            </div>
+            <div class="brand-item" onclick="selectBrand('lg')">
+                <span class="brand-logo">🔴</span>
+                <span class="brand-name">LG</span>
+            </div>
+            <div class="brand-item" onclick="selectBrand('samsung')">
+                <span class="brand-logo">🔵</span>
+                <span class="brand-name">Samsung</span>
+            </div>
+            <div class="brand-item" onclick="selectBrand('sony')">
+                <span class="brand-logo">⚫</span>
+                <span class="brand-name">Sony</span>
+            </div>
+            <div class="brand-item" onclick="selectBrand('tcl')">
+                <span class="brand-logo">🟢</span>
+                <span class="brand-name">TCL<span class="brand-badge">Roku</span></span>
+            </div>
+            <div class="brand-item" onclick="selectBrand('xiaomi')">
+                <span class="brand-logo">🟠</span>
+                <span class="brand-name">Xiaomi</span>
+            </div>
+            <div class="brand-item" onclick="selectBrand('hisense')">
+                <span class="brand-logo">🟣</span>
+                <span class="brand-name">Hisense<span class="brand-badge">Roku</span></span>
+            </div>
+        </div>
+
+        <div class="divider" style="max-width:340px;width:100;">or enter IP manually</div>
+        <div class="setup-manual" style="max-width:340px;width:100%;">
+            <input type="text" id="brandIpInput" placeholder="192.168.1.100" inputmode="decimal">
+            <div style="display:flex;gap:8px;margin-top:4px;">
+                <select id="brandIpBrand" style="flex:1;padding:10px;border-radius:10px;background:var(--btn-from);color:var(--text-primary);border:1px solid var(--border);font-size:14px;">
+                    <option value="philips">Philips</option>
+                    <option value="lg">LG</option>
+                    <option value="samsung">Samsung</option>
+                    <option value="sony">Sony</option>
+                    <option value="tcl">TCL (Roku)</option>
+                    <option value="xiaomi">Xiaomi</option>
+                    <option value="hisense">Hisense (Roku)</option>
+                </select>
+                <button class="btn primary" onclick="manualBrandConnect()">Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Screen (shown after brand selected, for brand-specific discovery) -->
     <div class="setup-screen" id="setupScreen">
         <h1>Classic Remote</h1>
-        <p>Find your TV on the network or enter IP manually</p>
-        <p style="font-size:12px;color:var(--text-secondary);margin:-16px 0 24px 0;">
-            ⚠️ Make sure your phone is connected to the <strong>2.4 GHz</strong> Wi-Fi network — Philips TVs are only visible on 2.4 GHz.
+        <p id="setupBrandMsg">Find your TV on the network or enter IP manually</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin:-16px 0 24px 0;" id="setupWifiHint">
+            ⚠️ Make sure your phone is connected to the <strong>2.4 GHz</strong> Wi-Fi network.
         </p>
 
         <button class="discover-btn" id="setupScanBtn" onclick="startDiscovery('setup')">
@@ -767,7 +873,7 @@
     <div class="page active" id="tvPage">
         <div class="main-content">
             <div class="top-header">
-                <button class="btn power" aria-label="Power" onclick="sendKey('Standby')">
+                <button class="btn power" aria-label="Power" onclick="sendKey('Power')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M12 2v10M18.4 6.6a9 9 0 1 1-12.8 0"/>
                     </svg>
@@ -809,22 +915,22 @@
                 <div class="dpad-container">
                     <div class="dpad">
                         <div class="empty"></div>
-                        <button class="btn" aria-label="Up" onclick="sendKey('CursorUp')">▲</button>
+                        <button class="btn" aria-label="Up" onclick="sendKey('Up')">▲</button>
                         <div class="empty"></div>
-                        <button class="btn" aria-label="Left" onclick="sendKey('CursorLeft')">◀</button>
-                        <button class="btn ok" aria-label="OK" onclick="sendKey('Confirm')">OK</button>
-                        <button class="btn" aria-label="Right" onclick="sendKey('CursorRight')">▶</button>
+                        <button class="btn" aria-label="Left" onclick="sendKey('Left')">◀</button>
+                        <button class="btn ok" aria-label="OK" onclick="sendKey('OK')">OK</button>
+                        <button class="btn" aria-label="Right" onclick="sendKey('Right')">▶</button>
                         <div class="empty"></div>
-                        <button class="btn" aria-label="Down" onclick="sendKey('CursorDown')">▼</button>
+                        <button class="btn" aria-label="Down" onclick="sendKey('Down')">▼</button>
                         <div class="empty"></div>
                     </div>
                 </div>
 
                 <div class="side-controls">
                     <div class="label">Ch</div>
-                    <button class="btn" aria-label="Channel up" onclick="sendKey('ChannelStepUp')">+</button>
+                    <button class="btn" aria-label="Channel up" onclick="sendKey('ChannelUp')">+</button>
                     <button class="btn mute" onclick="sendKey('Info')">INFO</button>
-                    <button class="btn" aria-label="Channel down" onclick="sendKey('ChannelStepDown')">−</button>
+                    <button class="btn" aria-label="Channel down" onclick="sendKey('ChannelDown')">−</button>
                 </div>
             </div>
 
@@ -872,10 +978,10 @@
                 </div>
 
                 <div class="color-row">
-                    <button class="btn color-red"    aria-label="Red" onclick="sendKey('RedColour')"></button>
-                    <button class="btn color-green"  aria-label="Green" onclick="sendKey('GreenColour')"></button>
-                    <button class="btn color-yellow" aria-label="Yellow" onclick="sendKey('YellowColour')"></button>
-                    <button class="btn color-blue"   aria-label="Blue" onclick="sendKey('BlueColour')"></button>
+                    <button class="btn color-red"    aria-label="Red" onclick="sendKey('Red')"></button>
+                    <button class="btn color-green"  aria-label="Green" onclick="sendKey('Green')"></button>
+                    <button class="btn color-yellow" aria-label="Yellow" onclick="sendKey('Yellow')"></button>
+                    <button class="btn color-blue"   aria-label="Blue" onclick="sendKey('Blue')"></button>
                 </div>
             </div>
         </div>
@@ -955,6 +1061,14 @@
                             <div class="settings-row-subtitle" id="settingsTvIp">Tap Change to configure</div>
                         </div>
                         <button class="settings-row-action" onclick="closeSettingsPage(); setTimeout(openTvModal, 360)">Change</button>
+                    </div>
+                    <div class="settings-row" style="border-top:1px solid var(--settings-sep);">
+                        <div class="settings-row-icon">🔄</div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Brand</div>
+                            <div class="settings-row-subtitle" id="settingsBrand">Philips</div>
+                        </div>
+                        <button class="settings-row-action" onclick="changeBrand()">Change</button>
                     </div>
                 </div>
             </div>
@@ -1284,10 +1398,14 @@
         async function openSettingsPage() {
             const config = await loadConfig();
             const name = localStorage.getItem('tvName');
+            const brand = getBrand();
+            const brandInfo = BRANDS[brand];
 
             document.getElementById('settingsTvName').textContent = name || 'No TV Connected';
             document.getElementById('settingsTvIp').textContent =
-                config?.ip ? `${config.ip}:${config.port} · API v${config.apiVersion || 1}` : 'Tap Change to configure';
+                config?.ip ? `${config.ip}:${config.port}` : 'Tap Change to configure';
+            document.getElementById('settingsBrand').textContent =
+                brandInfo ? `${brandInfo.icon} ${brandInfo.name}` : 'Not set';
 
             try {
                 const App = getPlugin('App');
@@ -1298,6 +1416,19 @@
             syncThemeSegmented();
             syncProUI();
             document.getElementById('settingsPage').classList.add('active');
+        }
+
+        function changeBrand() {
+            closeSettingsPage();
+            driverDisconnect();
+            stopPolling();
+            localStorage.removeItem('tvBrand');
+            localStorage.removeItem('tvIp');
+            localStorage.removeItem('tvPort');
+            localStorage.removeItem('tvName');
+            setTimeout(() => {
+                document.getElementById('brandSelectScreen').classList.add('active');
+            }, 360);
         }
 
         function closeSettingsPage() {
@@ -1658,8 +1789,6 @@
         // SERVER CONFIG
         // ============================================================
 
-        // In Capacitor (iOS) the app talks directly to the TV — no proxy server needed.
-        // In browser (served by server.py), relative URLs proxy through the Python server.
         const IS_CAPACITOR = window.location.protocol === 'capacitor:' || !!window.Capacitor?.isNative;
 
         function getServerUrl() {
@@ -1669,6 +1798,132 @@
             const port = localStorage.getItem('serverPort') || '8888';
             return ip ? `http://${ip}:${port}` : '';
         }
+
+        // ============================================================
+        // TV DRIVERS — multi-brand abstraction
+        // ============================================================
+
+        let currentDriver = null;
+        let _lgWs = null;        // LG SSAP WebSocket
+        let _lgPointerWs = null; // LG pointer input socket
+        let _lgClientKey = null;
+        let _lgReqId = 0;
+        let _lgPending = {};
+        let _samsungWs = null;   // Samsung WebSocket
+        let _samsungConnected = false;
+
+        // LG WebOS registration payload (signed manifest — do not modify)
+        const LG_REGISTRATION = {"forcePairing":false,"pairingType":"PROMPT","manifest":{"manifestVersion":1,"appVersion":"1.1","signed":{"created":"20140509","appId":"com.lge.test","vendorId":"com.lge","localizedAppNames":{"":"LG Remote App","ko-KR":"리모컨 앱","zxx-XX":"ЛГ Rэмotэ AПП"},"localizedVendorNames":{"":"LG Electronics"},"permissions":["TEST_SECURE","CONTROL_INPUT_TEXT","CONTROL_MOUSE_AND_KEYBOARD","READ_INSTALLED_APPS","READ_LGE_SDX","READ_NOTIFICATIONS","SEARCH","WRITE_SETTINGS","WRITE_NOTIFICATION_ALERT","CONTROL_POWER","READ_CURRENT_CHANNEL","READ_RUNNING_APPS","READ_UPDATE_INFO","UPDATE_FROM_REMOTE_APP","READ_LGE_TV_INPUT_EVENTS","READ_TV_CURRENT_TIME"],"serial":"2f930e2d2cfe083771f68e4fe7bb07"},"permissions":["LAUNCH","LAUNCH_WEBAPP","APP_TO_APP","CLOSE","TEST_OPEN","TEST_PROTECTED","CONTROL_AUDIO","CONTROL_DISPLAY","CONTROL_INPUT_JOYSTICK","CONTROL_INPUT_MEDIA_RECORDING","CONTROL_INPUT_MEDIA_PLAYBACK","CONTROL_INPUT_TV","CONTROL_POWER","READ_APP_STATUS","READ_CURRENT_CHANNEL","READ_INPUT_DEVICE_LIST","READ_NETWORK_STATE","READ_RUNNING_APPS","READ_TV_CHANNEL_LIST","WRITE_NOTIFICATION_TOAST","READ_POWER_STATE","READ_COUNTRY_INFO","READ_SETTINGS","CONTROL_TV_SCREEN","CONTROL_TV_STANBY","CONTROL_FAVORITE_GROUP","CONTROL_USER_INFO","CHECK_BLUETOOTH_DEVICE","CONTROL_BLUETOOTH","CONTROL_TIMER_INFO","STB_INTERNAL_CONNECTION","CONTROL_RECORDING","READ_RECORDING_STATE","WRITE_RECORDING_LIST","READ_RECORDING_LIST","READ_RECORDING_SCHEDULE","WRITE_RECORDING_SCHEDULE","READ_STORAGE_DEVICE_LIST","READ_TV_PROGRAM_INFO","CONTROL_BOX_CHANNEL","READ_TV_ACR_AUTH_TOKEN","READ_TV_CONTENT_STATE","READ_TV_CURRENT_TIME","ADD_LAUNCHER_CHANNEL","SET_CHANNEL_SKIP","RELEASE_CHANNEL_SKIP","CONTROL_CHANNEL_BLOCK","DELETE_SELECT_CHANNEL","CONTROL_CHANNEL_GROUP","SCAN_TV_CHANNELS","CONTROL_TV_POWER","CONTROL_WOL"],"signatures":[{"signatureVersion":1,"signature":"eyJhbGdvcml0aG0iOiJSU0EtU0hBMjU2Iiwia2V5SWQiOiJ0ZXN0LXNpZ25pbmctY2VydCIsInNpZ25hdHVyZVZlcnNpb24iOjF9.hrVRgjCwXVvE2OOSpDZ58hR+59aFNwYDyjQgKk3auukd7pcegmE2CzPCa0bJ0ZsRAcKkCTJrWo5iDzNhMBWRyaMOv5zWSrthlf7G128qvIlpMT0YNY+n/FaOHE73uLrS/g7swl3/qH/BGFG2Hu4RlL48eb3lLKqTt2xKHdCs6Cd4RMfJPYnzgvI4BNrFUKsjkcu+WD4OO2A27Pq1n50cMchmcaXadJhGrOqH5YmHdOCj5NSHzJYrsW0HPlpuAx/ECMeIZYDh6RMqaFM2DXzdKX9NmmyqzJ3o/0lkk/N97gfVRLW5hA29yeAwaCViZNCP8iC9aO0q9fQojoa7NQnAtw=="}]}};
+
+        // Sony IRCC codes
+        const SONY_IRCC = {
+            Power:'AAAAAQAAAAEAAAAVAw==',PowerOff:'AAAAAQAAAAEAAAAvAw==',
+            VolumeUp:'AAAAAQAAAAEAAAASAw==',VolumeDown:'AAAAAQAAAAEAAAATAw==',Mute:'AAAAAQAAAAEAAAAUAw==',
+            Up:'AAAAAQAAAAEAAAB0Aw==',Down:'AAAAAQAAAAEAAAB1Aw==',Left:'AAAAAQAAAAEAAAA0Aw==',Right:'AAAAAQAAAAEAAAAzAw==',
+            Confirm:'AAAAAQAAAAEAAABlAw==',Home:'AAAAAQAAAAEAAABgAw==',Return:'AAAAAgAAAJcAAAAjAw==',
+            ChannelUp:'AAAAAQAAAAEAAAAQAw==',ChannelDown:'AAAAAQAAAAEAAAARAw==',
+            Play:'AAAAAgAAAJcAAAAaAw==',Pause:'AAAAAgAAAJcAAAAZAw==',Stop:'AAAAAgAAAJcAAAAYAw==',
+            Rewind:'AAAAAgAAAJcAAAAbAw==',Forward:'AAAAAgAAAJcAAAAcAw==',Rec:'AAAAAgAAAJcAAAAgAw==',
+            Input:'AAAAAQAAAAEAAAAlAw==',Info:'AAAAAQAAAAEAAAA6Aw==',Options:'AAAAAgAAAJcAAAA2Aw==',
+            Red:'AAAAAgAAAJcAAAAlAw==',Green:'AAAAAgAAAJcAAAAmAw==',Yellow:'AAAAAgAAAJcAAAAnAw==',Blue:'AAAAAgAAAJcAAAAkAw==',
+            Netflix:'AAAAAgAAABoAAAB8Aw==',ActionMenu:'AAAAAgAAAMQAAABLAw==',EPG:'AAAAAgAAAKQAAABbAw==',
+            Hdmi1:'AAAAAgAAABoAAABaAw==',Hdmi2:'AAAAAgAAABoAAABbAw==',Hdmi3:'AAAAAgAAABoAAABcAw==',Hdmi4:'AAAAAgAAABoAAABdAw==',
+        };
+
+        // Universal key → per-brand key mapping
+        const KEY_MAPS = {
+            philips: {
+                Power:'Standby',VolumeUp:'VolumeUp',VolumeDown:'VolumeDown',Mute:'Mute',
+                Up:'CursorUp',Down:'CursorDown',Left:'CursorLeft',Right:'CursorRight',OK:'Confirm',
+                Home:'Home',Back:'Back',Source:'Source',Options:'Options',
+                ChannelUp:'ChannelStepUp',ChannelDown:'ChannelStepDown',Info:'Info',
+                Play:'Play',Pause:'Pause',Stop:'Stop',Rewind:'Rewind',FastForward:'FastForward',Record:'Record',
+                Red:'RedColour',Green:'GreenColour',Yellow:'YellowColour',Blue:'BlueColour',
+                Find:'Find',Adjust:'Adjust',
+            },
+            lg: {
+                Power:'POWER',VolumeUp:'VOLUMEUP',VolumeDown:'VOLUMEDOWN',Mute:'MUTE',
+                Up:'UP',Down:'DOWN',Left:'LEFT',Right:'RIGHT',OK:'ENTER',
+                Home:'HOME',Back:'BACK',Source:'INPUT',Options:'MENU',
+                ChannelUp:'CHANNELUP',ChannelDown:'CHANNELDOWN',Info:'INFO',
+                Play:'PLAY',Pause:'PAUSE',Stop:'STOP',Rewind:'REWIND',FastForward:'FASTFORWARD',Record:'RECORD',
+                Red:'RED',Green:'GREEN',Yellow:'YELLOW',Blue:'BLUE',
+                Find:'SEARCH',Adjust:'QMENU',
+            },
+            samsung: {
+                Power:'KEY_POWER',VolumeUp:'KEY_VOLUP',VolumeDown:'KEY_VOLDOWN',Mute:'KEY_MUTE',
+                Up:'KEY_UP',Down:'KEY_DOWN',Left:'KEY_LEFT',Right:'KEY_RIGHT',OK:'KEY_ENTER',
+                Home:'KEY_HOME',Back:'KEY_RETURN',Source:'KEY_SOURCE',Options:'KEY_MENU',
+                ChannelUp:'KEY_CHUP',ChannelDown:'KEY_CHDOWN',Info:'KEY_INFO',
+                Play:'KEY_PLAY',Pause:'KEY_PAUSE',Stop:'KEY_STOP',Rewind:'KEY_REWIND',FastForward:'KEY_FF',Record:'KEY_REC',
+                Red:'KEY_RED',Green:'KEY_GREEN',Yellow:'KEY_YELLOW',Blue:'KEY_CYAN',
+                Find:'KEY_SEARCH',Adjust:'KEY_TOOLS',
+            },
+            sony: {
+                Power:'Power',VolumeUp:'VolumeUp',VolumeDown:'VolumeDown',Mute:'Mute',
+                Up:'Up',Down:'Down',Left:'Left',Right:'Right',OK:'Confirm',
+                Home:'Home',Back:'Return',Source:'Input',Options:'Options',
+                ChannelUp:'ChannelUp',ChannelDown:'ChannelDown',Info:'Info',
+                Play:'Play',Pause:'Pause',Stop:'Stop',Rewind:'Rewind',FastForward:'Forward',Record:'Rec',
+                Red:'Red',Green:'Green',Yellow:'Yellow',Blue:'Blue',
+                Find:'',Adjust:'ActionMenu',
+            },
+            tcl: {
+                Power:'Power',VolumeUp:'VolumeUp',VolumeDown:'VolumeDown',Mute:'VolumeMute',
+                Up:'Up',Down:'Down',Left:'Left',Right:'Right',OK:'Select',
+                Home:'Home',Back:'Back',Source:'InputHDMI1',Options:'Info',
+                ChannelUp:'ChannelUp',ChannelDown:'ChannelDown',Info:'Info',
+                Play:'Play',Pause:'Play',Stop:'Play',Rewind:'Rev',FastForward:'Fwd',Record:'',
+                Red:'',Green:'',Yellow:'',Blue:'',
+                Find:'Search',Adjust:'InstantReplay',
+            },
+            xiaomi: {
+                Power:'power',VolumeUp:'volumeup',VolumeDown:'volumedown',Mute:'',
+                Up:'up',Down:'down',Left:'left',Right:'right',OK:'enter',
+                Home:'home',Back:'back',Source:'',Options:'menu',
+                ChannelUp:'',ChannelDown:'',Info:'',
+                Play:'',Pause:'',Stop:'',Rewind:'',FastForward:'',Record:'',
+                Red:'',Green:'',Yellow:'',Blue:'',
+                Find:'',Adjust:'',
+            },
+            hisense: {
+                Power:'Power',VolumeUp:'VolumeUp',VolumeDown:'VolumeDown',Mute:'VolumeMute',
+                Up:'Up',Down:'Down',Left:'Left',Right:'Right',OK:'Select',
+                Home:'Home',Back:'Back',Source:'InputHDMI1',Options:'Info',
+                ChannelUp:'ChannelUp',ChannelDown:'ChannelDown',Info:'Info',
+                Play:'Play',Pause:'Play',Stop:'Play',Rewind:'Rev',FastForward:'Fwd',Record:'',
+                Red:'',Green:'',Yellow:'',Blue:'',
+                Find:'Search',Adjust:'InstantReplay',
+            },
+        };
+
+        // Extra brand-specific buttons
+        const EXTRA_BUTTONS = {
+            philips: [{label:'Ambilight',key:'AmbilightOnOff',icon:'💡'},{label:'Options',key:'Options',icon:'⚙️'}],
+            lg: [{label:'Screen Share',key:'SCREEN_SHARE',icon:'📱'},{label:'My Apps',key:'MYAPPS',icon:'📦'}],
+            samsung: [{label:'Smart Hub',key:'KEY_CONTENTS',icon:'🏠'},{label:'Ambient',key:'KEY_AMBIENT',icon:'🖼️'}],
+            sony: [{label:'Action Menu',key:'ActionMenu',icon:'🎬'},{label:'Netflix',key:'Netflix',icon:'🎬'},{label:'Google Assistant',key:'',icon:'🎙️'}],
+            tcl: [{label:'Star',key:'Info',icon:'⭐'},{label:'Instant Replay',key:'InstantReplay',icon:'🔄'}],
+            xiaomi: [{label:'Menu',key:'menu',icon:'☰'}],
+            hisense: [{label:'Star',key:'Info',icon:'⭐'}],
+        };
+
+        // Brand display config
+        const BRANDS = {
+            philips: { name: 'Philips', icon: '📺', port: 1925 },
+            lg:      { name: 'LG',      icon: '🔴', port: 3000 },
+            samsung: { name: 'Samsung', icon: '🔵', port: 8001 },
+            sony:    { name: 'Sony',    icon: '⚫', port: 80 },
+            tcl:     { name: 'TCL',     icon: '🟢', port: 8060 },
+            xiaomi:  { name: 'Xiaomi',  icon: '🟠', port: 6095 },
+            hisense: { name: 'Hisense', icon: '🟣', port: 8060 },
+        };
+
+        function getBrand() { return localStorage.getItem('tvBrand') || 'philips'; }
+
+        // ============================================================
+        // DRIVER: PHILIPS (existing JointSpace logic)
+        // ============================================================
 
         function getApiBase() {
             const version = parseInt(localStorage.getItem('tvApiVersion') || '1');
@@ -1682,6 +1937,451 @@
             return `${getServerUrl()}/api/${version}`;
         }
 
+        async function _philipsSendKey(key) {
+            const base = getApiBase();
+            if (!base) return false;
+            const opts = { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({key}) };
+            const doSend = () => apiFetch(base + '/input/key', opts);
+            try {
+                let r;
+                try { r = await doSend(); } catch { await new Promise(r=>setTimeout(r,300)); r = await doSend(); }
+                return r.ok;
+            } catch { return false; }
+        }
+
+        async function _philipsGetVolume() {
+            try {
+                const r = await apiFetch(`${getApiBase()}/audio/volume`);
+                if (!r.ok) return null;
+                return await r.json();
+            } catch { return null; }
+        }
+
+        async function _philipsSetVolume(level) {
+            try {
+                await apiFetch(`${getApiBase()}/audio/volume`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({current:parseInt(level),muted:false}),
+                });
+                return true;
+            } catch { return false; }
+        }
+
+        async function _philipsProbe(ip) {
+            const candidates = [[ip,1925,1,'http'],[ip,1925,6,'https'],[ip,1925,5,'http'],[ip,1926,6,'https']];
+            for (const [h,p,v,s] of candidates) {
+                try {
+                    const ctrl = new AbortController();
+                    setTimeout(()=>ctrl.abort(), 2500);
+                    const r = await fetch(`${s}://${h}:${p}/${v}/system`,{signal:ctrl.signal});
+                    if (!r.ok) continue;
+                    const d = await r.json();
+                    return {ip:h,port:p,apiVersion:v,name:d.name||'Philips TV',model:d.model||'',brandId:'philips'};
+                } catch {}
+            }
+            return null;
+        }
+
+        // ============================================================
+        // DRIVER: LG WebOS SSAP (WebSocket)
+        // ============================================================
+
+        function _lgConnect(ip) {
+            return new Promise((resolve, reject) => {
+                _lgWs = new WebSocket('ws://' + ip + ':3000');
+                _lgWs.onopen = () => {
+                    const payload = JSON.parse(JSON.stringify(LG_REGISTRATION));
+                    _lgClientKey = localStorage.getItem('lg_client_key_' + ip);
+                    if (_lgClientKey) payload['client-key'] = _lgClientKey;
+                    _lgWs.send(JSON.stringify({type:'register',id:'register_0',payload}));
+                };
+                _lgWs.onmessage = (evt) => {
+                    const data = JSON.parse(evt.data);
+                    if (data.id === 'register_0') {
+                        if (data.type === 'registered') {
+                            if (data.payload?.['client-key']) {
+                                _lgClientKey = data.payload['client-key'];
+                                localStorage.setItem('lg_client_key_' + ip, _lgClientKey);
+                            }
+                            resolve(true);
+                        } else if (data.type === 'error') {
+                            reject(new Error('LG registration rejected'));
+                        }
+                        // type=response means TV showing prompt, wait
+                        return;
+                    }
+                    const pending = _lgPending[data.id];
+                    if (pending) {
+                        delete _lgPending[data.id];
+                        if (data.type === 'error') pending.reject(data);
+                        else pending.resolve(data.payload);
+                    }
+                };
+                _lgWs.onerror = (e) => reject(e);
+                _lgWs.onclose = () => { _lgWs = null; _lgPointerWs = null; };
+                setTimeout(() => reject(new Error('LG connection timeout')), 30000);
+            });
+        }
+
+        function _lgRequest(uri, payload) {
+            return new Promise((resolve, reject) => {
+                if (!_lgWs || _lgWs.readyState !== WebSocket.OPEN) { reject(new Error('Not connected')); return; }
+                const id = 'req_' + (++_lgReqId);
+                _lgPending[id] = {resolve, reject};
+                _lgWs.send(JSON.stringify({type:'request',id,uri,payload:payload||{}}));
+            });
+        }
+
+        async function _lgOpenPointerSocket(ip) {
+            const res = await _lgRequest('ssap://com.webos.service.networkinput/getPointerInputSocket');
+            _lgPointerWs = new WebSocket(res.socketPath);
+            return new Promise((resolve, reject) => {
+                _lgPointerWs.onopen = () => resolve();
+                _lgPointerWs.onerror = (e) => reject(e);
+            });
+        }
+
+        async function _lgSendKey(key) {
+            if (_lgPointerWs && _lgPointerWs.readyState === WebSocket.OPEN) {
+                _lgPointerWs.send('type:button\nname:' + key + '\n\n');
+                return true;
+            }
+            // Fallback: try SSAP commands for volume/media
+            const ssapMap = {VolumeUp:'ssap://audio/volumeUp',VolumeDown:'ssap://audio/volumeDown',
+                ChannelUp:'ssap://tv/channelUp',ChannelDown:'ssap://tv/channelDown'};
+            if (ssapMap[key]) { await _lgRequest(ssapMap[key]); return true; }
+            return false;
+        }
+
+        async function _lgGetVolume() {
+            try {
+                const r = await _lgRequest('ssap://audio/getVolume');
+                return {current:r.volume, max:100, min:0, muted:r.muted};
+            } catch { return null; }
+        }
+
+        async function _lgSetVolume(level) {
+            try { await _lgRequest('ssap://audio/setVolume', {volume:parseInt(level)}); return true; }
+            catch { return false; }
+        }
+
+        async function _lgProbe(ip) {
+            return new Promise((resolve) => {
+                const timer = setTimeout(() => { try{ws.close();}catch{} resolve(null); }, 3000);
+                let ws;
+                try { ws = new WebSocket('ws://' + ip + ':3000'); } catch { clearTimeout(timer); resolve(null); return; }
+                ws.onopen = () => {
+                    ws.send(JSON.stringify({type:'register',id:'probe_0',payload:{forcePairing:false,pairingType:'PROMPT',manifest:{}}}));
+                };
+                ws.onmessage = (evt) => {
+                    clearTimeout(timer);
+                    try {
+                        const d = JSON.parse(evt.data);
+                        if (d.type === 'response' || d.type === 'registered') {
+                            ws.close();
+                            resolve({ip,port:3000,name:'LG TV',model:'WebOS',brandId:'lg'});
+                            return;
+                        }
+                    } catch {}
+                    ws.close(); resolve(null);
+                };
+                ws.onerror = () => { clearTimeout(timer); resolve(null); };
+            });
+        }
+
+        // ============================================================
+        // DRIVER: SAMSUNG Tizen (WebSocket)
+        // ============================================================
+
+        function _samsungConnect(ip) {
+            return new Promise((resolve, reject) => {
+                const token = localStorage.getItem('samsung_token_' + ip);
+                const name64 = btoa('ClassicRemote');
+                let url = 'ws://' + ip + ':8001/api/v2/channels/samsung.remote.control?name=' + name64;
+                if (token) url += '&token=' + token;
+                _samsungWs = new WebSocket(url);
+                _samsungWs.onopen = () => {};
+                _samsungWs.onmessage = (evt) => {
+                    const msg = JSON.parse(evt.data);
+                    if (msg.event === 'ms.channel.connect') {
+                        _samsungConnected = true;
+                        if (msg.data?.token) {
+                            localStorage.setItem('samsung_token_' + ip, msg.data.token);
+                        }
+                        resolve(true);
+                    } else if (msg.event === 'ms.channel.unauthorized') {
+                        reject(new Error('Samsung TV denied connection'));
+                    }
+                };
+                _samsungWs.onerror = (e) => reject(e);
+                _samsungWs.onclose = () => { _samsungWs = null; _samsungConnected = false; };
+                setTimeout(() => reject(new Error('Samsung connection timeout')), 30000);
+            });
+        }
+
+        function _samsungSendKey(key) {
+            if (!_samsungWs || !_samsungConnected) return false;
+            _samsungWs.send(JSON.stringify({
+                method:'ms.remote.control',
+                params:{Cmd:'Click',DataOfCmd:key,Option:'false',TypeOfRemote:'SendRemoteKey'}
+            }));
+            return true;
+        }
+
+        async function _samsungProbe(ip) {
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 3000);
+                const r = await fetch('http://' + ip + ':8001/api/v2/', {signal:ctrl.signal});
+                if (!r.ok) return null;
+                const j = await r.json();
+                if (j.device?.type === 'Samsung SmartTV') {
+                    return {ip,port:8001,name:j.device.name||'Samsung TV',model:j.device.modelName||'',brandId:'samsung'};
+                }
+            } catch {}
+            return null;
+        }
+
+        // ============================================================
+        // DRIVER: SONY Bravia (HTTP REST + IRCC SOAP)
+        // ============================================================
+
+        async function _sonySendKey(key) {
+            const ip = localStorage.getItem('tvIp');
+            const psk = localStorage.getItem('tvPsk_' + ip) || '0000';
+            const irccCode = SONY_IRCC[key];
+            if (!irccCode) return false;
+            const xml = `<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>${irccCode}</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>`;
+            try {
+                const r = await fetch(`http://${ip}/sony/IRCC`, {
+                    method:'POST',
+                    headers:{'Content-Type':'text/xml; charset=UTF-8','SOAPACTION':'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"','X-Auth-PSK':psk},
+                    body:xml,
+                });
+                return r.ok;
+            } catch { return false; }
+        }
+
+        async function _sonyRpc(service, method, params, version) {
+            const ip = localStorage.getItem('tvIp');
+            const psk = localStorage.getItem('tvPsk_' + ip) || '0000';
+            const r = await fetch(`http://${ip}/sony/${service}`, {
+                method:'POST',
+                headers:{'Content-Type':'application/json','X-Auth-PSK':psk},
+                body:JSON.stringify({method,id:1,params:params||[],version:version||'1.0'}),
+            });
+            const j = await r.json();
+            if (j.error) throw new Error(JSON.stringify(j.error));
+            return j.result;
+        }
+
+        async function _sonyGetVolume() {
+            try {
+                const r = await _sonyRpc('audio','getVolumeInformation');
+                const speaker = (r[0]||[]).find(v => v.target === 'speaker') || r[0]?.[0];
+                if (!speaker) return null;
+                return {current:speaker.volume, max:speaker.maxVolume||100, min:speaker.minVolume||0, muted:speaker.mute};
+            } catch { return null; }
+        }
+
+        async function _sonySetVolume(level) {
+            try { await _sonyRpc('audio','setAudioVolume',[{target:'speaker',volume:String(level),ui:'on'}],'1.2'); return true; }
+            catch { return false; }
+        }
+
+        async function _sonyProbe(ip) {
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 3000);
+                const r = await fetch(`http://${ip}/sony/system`, {
+                    method:'POST', signal:ctrl.signal,
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({method:'getSystemInformation',id:1,params:[],version:'1.0'}),
+                });
+                if (!r.ok) return null;
+                const j = await r.json();
+                if (j.result) {
+                    const info = j.result[0];
+                    return {ip,port:80,name:info.name||info.product||'Sony TV',model:info.model||'',brandId:'sony'};
+                }
+            } catch {}
+            return null;
+        }
+
+        // ============================================================
+        // DRIVER: TCL / Hisense Roku (ECP HTTP REST)
+        // ============================================================
+
+        async function _rokuSendKey(key) {
+            const ip = localStorage.getItem('tvIp');
+            const port = localStorage.getItem('tvPort') || '8060';
+            try {
+                const r = await fetch(`http://${ip}:${port}/keypress/${key}`, {method:'POST'});
+                return r.ok || r.status === 202;
+            } catch { return false; }
+        }
+
+        async function _rokuProbe(ip, brandId) {
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 3000);
+                const r = await fetch(`http://${ip}:8060/query/device-info`, {signal:ctrl.signal});
+                if (!r.ok) return null;
+                const xml = await r.text();
+                if (!xml.includes('<device-info>')) return null;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xml, 'text/xml');
+                const name = doc.querySelector('friendly-device-name')?.textContent
+                          || doc.querySelector('user-device-name')?.textContent || (brandId === 'hisense' ? 'Hisense TV' : 'TCL TV');
+                const model = doc.querySelector('model-name')?.textContent || '';
+                return {ip, port:8060, name, model, brandId: brandId || 'tcl'};
+            } catch { return null; }
+        }
+
+        // ============================================================
+        // DRIVER: XIAOMI (HTTP GET port 6095)
+        // ============================================================
+
+        async function _xiaomiSendKey(key) {
+            const ip = localStorage.getItem('tvIp');
+            try {
+                const r = await fetch(`http://${ip}:6095/controller?action=keyevent&keycode=${key}`);
+                return r.ok;
+            } catch { return false; }
+        }
+
+        async function _xiaomiGetVolume() {
+            const ip = localStorage.getItem('tvIp');
+            try {
+                const r = await fetch(`http://${ip}:6095/general?action=getVolum`);
+                if (!r.ok) return null;
+                const d = await r.json();
+                return {current: d.volum ?? d.volume ?? 0, max: 100, min: 0, muted: false};
+            } catch { return null; }
+        }
+
+        async function _xiaomiProbe(ip) {
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 2500);
+                const r = await fetch(`http://${ip}:6095/request?action=isalive`, {signal:ctrl.signal});
+                if (r.ok) return {ip, port:6095, name:'Xiaomi TV', model:'', brandId:'xiaomi'};
+            } catch {}
+            return null;
+        }
+
+        // ============================================================
+        // UNIFIED DRIVER DISPATCH
+        // ============================================================
+
+        async function driverSendKey(universalKey) {
+            const brand = getBrand();
+            const mapped = KEY_MAPS[brand]?.[universalKey] || universalKey;
+            if (!mapped) return false;
+            switch (brand) {
+                case 'philips': return await _philipsSendKey(mapped);
+                case 'lg':      return await _lgSendKey(mapped);
+                case 'samsung': return _samsungSendKey(mapped);
+                case 'sony':    return await _sonySendKey(mapped);
+                case 'tcl':
+                case 'hisense': return await _rokuSendKey(mapped);
+                case 'xiaomi':  return await _xiaomiSendKey(mapped);
+                default: return false;
+            }
+        }
+
+        async function driverGetVolume() {
+            switch (getBrand()) {
+                case 'philips': return await _philipsGetVolume();
+                case 'lg':      return await _lgGetVolume();
+                case 'sony':    return await _sonyGetVolume();
+                case 'xiaomi':  return await _xiaomiGetVolume();
+                case 'samsung': case 'tcl': case 'hisense':
+                    return null; // No volume GET API for these brands
+                default: return null;
+            }
+        }
+
+        async function driverSetVolume(level) {
+            switch (getBrand()) {
+                case 'philips': return await _philipsSetVolume(level);
+                case 'lg':      return await _lgSetVolume(level);
+                case 'sony':    return await _sonySetVolume(level);
+                case 'samsung': // Send volume keys instead
+                    return false;
+                case 'tcl': case 'hisense': case 'xiaomi':
+                    return false; // No direct volume set
+                default: return false;
+            }
+        }
+
+        async function driverConnect() {
+            const brand = getBrand();
+            const ip = localStorage.getItem('tvIp');
+            if (!ip) return false;
+            try {
+                if (brand === 'lg') {
+                    await _lgConnect(ip);
+                    await _lgOpenPointerSocket(ip);
+                    return true;
+                }
+                if (brand === 'samsung') {
+                    await _samsungConnect(ip);
+                    return true;
+                }
+                return true; // HTTP-based drivers don't need persistent connection
+            } catch (e) {
+                console.warn('[driverConnect]', brand, e);
+                return false;
+            }
+        }
+
+        function driverDisconnect() {
+            if (_lgWs) { try{_lgWs.close();}catch{} _lgWs = null; }
+            if (_lgPointerWs) { try{_lgPointerWs.close();}catch{} _lgPointerWs = null; }
+            if (_samsungWs) { try{_samsungWs.close();}catch{} _samsungWs = null; _samsungConnected = false; }
+        }
+
+        async function driverProbe(ip, brand) {
+            switch (brand || getBrand()) {
+                case 'philips': return await _philipsProbe(ip);
+                case 'lg':      return await _lgProbe(ip);
+                case 'samsung': return await _samsungProbe(ip);
+                case 'sony':    return await _sonyProbe(ip);
+                case 'tcl':     return await _rokuProbe(ip, 'tcl');
+                case 'hisense': return await _rokuProbe(ip, 'hisense');
+                case 'xiaomi':  return await _xiaomiProbe(ip);
+                default: return null;
+            }
+        }
+
+        // Multi-brand discovery: scan subnet with all protocols in parallel
+        async function scanAllBrandsOnSubnet(subnet) {
+            const allTvs = [];
+            const ips = Array.from({length:254}, (_,i) => `${subnet}.${i+1}`);
+            const batch = 20;
+            for (let i = 0; i < ips.length; i += batch) {
+                const batchIps = ips.slice(i, i + batch);
+                const results = await Promise.all(batchIps.flatMap(ip => [
+                    _philipsProbe(ip).catch(()=>null),
+                    _lgProbe(ip).catch(()=>null),
+                    _samsungProbe(ip).catch(()=>null),
+                    _sonyProbe(ip).catch(()=>null),
+                    _rokuProbe(ip,'tcl').catch(()=>null),
+                    _xiaomiProbe(ip).catch(()=>null),
+                ]));
+                results.forEach(r => { if (r) allTvs.push(r); });
+                if (allTvs.length > 0) break;
+            }
+            // Deduplicate by IP (same TV may respond to multiple probes)
+            const seen = new Set();
+            return allTvs.filter(tv => { if (seen.has(tv.ip)) return false; seen.add(tv.ip); return true; });
+        }
+
+        // ============================================================
+        // CONFIG (brand-aware)
+        // ============================================================
+
         async function loadConfig() {
             if (IS_CAPACITOR) {
                 const ip = localStorage.getItem('tvIp');
@@ -1690,47 +2390,48 @@
                     ip,
                     port: parseInt(localStorage.getItem('tvPort') || '1925'),
                     apiVersion: parseInt(localStorage.getItem('tvApiVersion') || '1'),
+                    brand: localStorage.getItem('tvBrand') || 'philips',
                 };
             }
             try {
                 const res = await fetch(`${getServerUrl()}/config`);
                 if (!res.ok) return null;
-                return await res.json();
+                const cfg = await res.json();
+                cfg.brand = localStorage.getItem('tvBrand') || 'philips';
+                return cfg;
             } catch { return null; }
         }
 
         async function saveConfig(ip, port, apiVersion) {
+            const brand = getBrand();
             localStorage.setItem('tvIp', ip);
-            localStorage.setItem('tvPort', String(port || 1925));
+            localStorage.setItem('tvPort', String(port || BRANDS[brand]?.port || 1925));
             localStorage.setItem('tvApiVersion', String(apiVersion || 1));
             if (!IS_CAPACITOR) {
                 try {
-                    // Include digest credentials for v6 so server.py can proxy authenticated requests.
                     const configPayload = { ip, port: port || 1925, apiVersion: apiVersion || 1 };
-                    if ((apiVersion || 1) >= 6) {
+                    if (brand === 'philips' && (apiVersion || 1) >= 6) {
                         const cred = _getTvCredentials(ip);
                         if (cred) { configPayload.tvUser = cred.user; configPayload.tvPass = cred.pass; }
                     }
                     await fetch(`${getServerUrl()}/config`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: {'Content-Type':'application/json'},
                         body: JSON.stringify(configPayload),
                     });
                 } catch {}
             }
-            // Sync TV config to App Group UserDefaults so the iOS widget can read it.
-            // TvConfigHandler.swift registered via CAPBridgeViewController.webView in AppDelegate.
             if (IS_CAPACITOR) {
                 try {
-                    const cred = (apiVersion || 1) >= 6 ? _getTvCredentials(ip) : null;
+                    const cred = brand === 'philips' && (apiVersion || 1) >= 6 ? _getTvCredentials(ip) : null;
                     window.webkit.messageHandlers.tvConfig.postMessage({
-                        ip,
-                        port: port || 1925,
+                        ip, port: port || BRANDS[brand]?.port || 1925,
                         apiVersion: apiVersion || 1,
                         authUser: cred?.user ?? '',
                         authPass: cred?.pass ?? '',
+                        brand: brand,
+                        token: localStorage.getItem('samsung_token_' + ip) || localStorage.getItem('lg_client_key_' + ip) || '',
+                        psk: localStorage.getItem('tvPsk_' + ip) || '',
                     });
-                    console.log('[saveConfig] tvConfig message sent');
                 } catch (e) {
                     console.warn('[saveConfig] tvConfig handler not ready:', e?.message || e);
                 }
@@ -1754,68 +2455,48 @@
             });
         }
 
-        // Probe one IP directly for a Philips TV.
-        // Tries: port 1925 v1 HTTP, port 1925 v6 HTTPS, port 1925 v5 HTTP,
-        //        port 1926 v6 HTTPS (Android TV uses port 1926).
-        // AbortController works with CapacitorHttp GET: signal is passed to WKWebView fetch.
-        async function probeTvDirect(ip, port = 1925) {
-            const candidates = [
-                [ip, port, 1, 'http'],
-                [ip, port, 6, 'https'],
-                [ip, port, 5, 'http'],
-                [ip, 1926,  6, 'https'],  // Android TV
-            ];
-            for (const [probeIp, probePort, v, scheme] of candidates) {
-                try {
-                    const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 2500);
-                    const r = await fetch(`${scheme}://${probeIp}:${probePort}/${v}/system`, { signal: ctrl.signal });
-                    if (!r.ok) continue;
-                    const d = await r.json();
-                    console.log(`[scan] Found TV at ${probeIp}:${probePort} v${v}`);
-                    return { ip: probeIp, port: probePort, apiVersion: v, name: d.name || 'Philips TV', model: d.model || '' };
-                } catch {}
-            }
-            return null;
+        // Probe one IP for a specific brand TV
+        async function probeTvDirect(ip, port) {
+            const brand = getBrand();
+            return await driverProbe(ip, brand);
         }
 
-        // Scan /24 subnet directly from the app in parallel batches
-        async function scanSubnetDirect(subnet, port = 1925) {
-            console.log(`[scan] Scanning ${subnet}.* ...`);
+        // Scan /24 subnet for the current brand
+        async function scanSubnetDirect(subnet) {
+            console.log(`[scan] Scanning ${subnet}.* for ${getBrand()}...`);
+            const brand = getBrand();
             const found = [];
             const ips = Array.from({ length: 254 }, (_, i) => `${subnet}.${i + 1}`);
             const batch = 30;
             for (let i = 0; i < ips.length; i += batch) {
-                const results = await Promise.all(ips.slice(i, i + batch).map(ip => probeTvDirect(ip, port)));
+                const results = await Promise.all(ips.slice(i, i + batch).map(ip => driverProbe(ip, brand)));
                 results.forEach(r => r && found.push(r));
-                if (found.length > 0) break; // stop scanning once TV is found
+                if (found.length > 0) break;
             }
             console.log(`[scan] ${subnet}.* done, found ${found.length} TV(s)`);
             return found;
         }
 
-        // Scan multiple common subnets sequentially (fallback when local IP unknown)
-        async function scanCommonSubnets(port = 1925) {
+        // Scan multiple common subnets sequentially
+        async function scanCommonSubnets() {
             const subnets = ['192.168.31','192.168.1','192.168.0','192.168.100',
                              '10.0.0','10.0.1','10.1.1','172.16.0'];
-            console.log('[scan] WebRTC failed, scanning common subnets:', subnets.join(', '));
             const found = [];
             for (const s of subnets) {
-                const res = await scanSubnetDirect(s, port);
+                const res = await scanSubnetDirect(s);
                 found.push(...res);
-                if (found.length > 0) break; // stop as soon as first TV found
+                if (found.length > 0) break;
             }
             return found;
         }
 
-        // Get subnets to scan: WebRTC first, fallback to common subnets
+        // Get subnets to scan
         async function getSubnetsToScan() {
             const localIp = await getLocalIpViaWebRTC();
             if (localIp) {
                 const parts = localIp.split('.');
                 return [`${parts[0]}.${parts[1]}.${parts[2]}`];
             }
-            // WebRTC failed — return null to trigger common-subnets fallback
             return null;
         }
 
@@ -1831,11 +2512,13 @@
             if (tvs.length > 0) {
                 list.innerHTML = tvs.map((tv, i) => {
                     const modelPart = tv.model ? ` — ${escHtml(tv.model)}` : '';
+                    const brandInfo = BRANDS[tv.brandId];
+                    const brandLabel = brandInfo ? `${brandInfo.icon} ${brandInfo.name}` : '';
                     return `
                     <div class="tv-item" onclick="selectTvByIndex(${i}, this, '${context}')">
                         <div class="tv-item-info">
-                            <div class="tv-item-name">${escHtml(tv.name || 'Philips TV')}</div>
-                            <div class="tv-item-ip">${escHtml(tv.ip)}:${escHtml(String(tv.port))}${modelPart} · API v${escHtml(String(tv.apiVersion || 1))}</div>
+                            <div class="tv-item-name">${escHtml(tv.name || 'TV')} ${brandLabel ? `<span class="brand-badge">${escHtml(brandLabel)}</span>` : ''}</div>
+                            <div class="tv-item-ip">${escHtml(tv.ip)}:${escHtml(String(tv.port))}${modelPart}</div>
                         </div>
                         <div class="tv-item-check">✓</div>
                     </div>`;
@@ -1848,7 +2531,8 @@
         function selectTvByIndex(i, el, context) {
             const tv = (_discoveredTvs[context] || [])[i];
             if (!tv) return;
-            selectTv(tv.ip, tv.port, tv.apiVersion || 1, tv.name || 'Philips TV', el, context);
+            if (tv.brandId) localStorage.setItem('tvBrand', tv.brandId);
+            selectTv(tv.ip, tv.port, tv.apiVersion || 1, tv.name || 'TV', el, context);
         }
 
         async function startDiscovery(context) {
@@ -1899,16 +2583,18 @@
                 Scan Again`;
         }
 
-        // Connect to a TV, triggering PIN pairing if needed (v6, no stored credentials).
+        // Connect to a TV, triggering pairing if needed.
         async function _connectTv(ip, port, apiVersion, name, closeUiFn) {
+            const brand = getBrand();
             await saveConfig(ip, port, apiVersion);
-            localStorage.setItem('tvName', name || 'Philips TV');
+            localStorage.setItem('tvName', name || 'TV');
             localStorage.setItem('tvApiVersion', String(apiVersion || 1));
-            document.getElementById('tvTitle').textContent = (name || 'PHILIPS TV').toUpperCase();
+            const brandInfo = BRANDS[brand];
+            document.getElementById('tvTitle').textContent = (name || brandInfo?.name || 'TV').toUpperCase();
             closeUiFn();
 
-            // v6 TVs require Digest Auth. If credentials are missing, start pairing.
-            if (IS_CAPACITOR && apiVersion >= 6 && !_getTvCredentials(ip)) {
+            // Philips v6 pairing
+            if (brand === 'philips' && IS_CAPACITOR && apiVersion >= 6 && !_getTvCredentials(ip)) {
                 await startPairing(ip, port, async () => {
                     await saveConfig(ip, port, apiVersion);
                     await _postConnectLoad();
@@ -1916,34 +2602,87 @@
                 return;
             }
 
+            // Sony PSK prompt
+            if (brand === 'sony' && !localStorage.getItem('tvPsk_' + ip)) {
+                const psk = prompt('Enter Sony TV Pre-Shared Key (set in TV Settings > Network > IP Control):', '0000');
+                if (psk) localStorage.setItem('tvPsk_' + ip, psk);
+            }
+
             await _postConnectLoad();
         }
 
-        // After connecting: show "Connecting...", wait for CapacitorHttp pool to clear
-        // (scan leaves ~250 in-flight requests), then confirm TV is reachable with retries.
+        // After connecting: establish WebSocket (LG/Samsung) or verify HTTP connectivity
         async function _postConnectLoad() {
+            const brand = getBrand();
             showStatus('connecting', 'Connecting...');
-            // Give CapacitorHttp URLSession pool time to drain after subnet scan
             if (IS_CAPACITOR) await new Promise(r => setTimeout(r, 1500));
-            // Retry getVolume up to 5× with 2s intervals until TV responds
+
+            // WebSocket-based brands need explicit connection
+            if (brand === 'lg' || brand === 'samsung') {
+                try {
+                    await driverConnect();
+                    showStatus('connected', 'Connected');
+                    // LG supports volume polling
+                    if (brand === 'lg') startPolling();
+                    else startPolling(); // Samsung: polling will just show connected
+                    renderExtraButtons();
+                    return;
+                } catch (e) {
+                    showStatus('error', e.message || 'Connection failed');
+                    return;
+                }
+            }
+
+            // HTTP-based brands: verify with retries
             let attempts = 0;
             const tryConnect = async () => {
-                try {
-                    const r = await apiFetch(`${getApiBase()}/audio/volume`);
-                    if (r.ok) {
-                        const d = await r.json();
-                        document.getElementById('volumeSlider').value = d.current ?? 0;
-                        document.getElementById('volumeValue').textContent = d.current ?? '';
-                        showStatus('connected', 'Connected');
-                        startPolling();
-                        loadTvCapabilities(); // fire-and-forget: update slider range + sources
-                        return;
-                    }
-                } catch {}
+                const vol = await driverGetVolume();
+                if (vol) {
+                    document.getElementById('volumeSlider').value = vol.current ?? 0;
+                    document.getElementById('volumeSlider').max = vol.max ?? 60;
+                    document.getElementById('volumeValue').textContent = vol.current ?? '';
+                    showStatus('connected', 'Connected');
+                    startPolling();
+                    renderExtraButtons();
+                    if (brand === 'philips') loadTvCapabilities();
+                    return;
+                }
+                // For brands without volume API, try a key probe
+                if (brand === 'tcl' || brand === 'hisense' || brand === 'xiaomi') {
+                    showStatus('connected', 'Connected');
+                    startPolling();
+                    renderExtraButtons();
+                    return;
+                }
                 if (++attempts < 5) setTimeout(tryConnect, 2000);
-                else { showStatus('error', 'Offline'); startPolling(); }
+                else { showStatus('error', 'Offline'); startPolling(); renderExtraButtons(); }
             };
             tryConnect();
+        }
+
+        // Render brand-specific extra buttons in the collapsible section
+        function renderExtraButtons() {
+            const brand = getBrand();
+            const extra = EXTRA_BUTTONS[brand] || [];
+            let container = document.getElementById('extraBrandBtns');
+            if (!container) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = '<div class="section-title" id="extraBrandTitle"></div><div class="nav-row" id="extraBrandBtns"></div>';
+                const collContent = document.querySelector('#tvCollapsible .collapsible-content') || document.getElementById('tvCollapsible');
+                if (collContent) collContent.prepend(section);
+                container = document.getElementById('extraBrandBtns');
+            }
+            const title = document.getElementById('extraBrandTitle');
+            if (title) title.textContent = BRANDS[brand]?.name || '';
+            if (container && extra.length > 0) {
+                container.innerHTML = extra.map(b =>
+                    `<button class="btn" onclick="sendKey('${escHtml(b.key)}')" ${!b.key ? 'disabled' : ''}>${b.icon} ${escHtml(b.label)}</button>`
+                ).join('');
+                attachTouchFeedback(container.querySelectorAll('.btn'));
+            } else if (container) {
+                container.innerHTML = '';
+            }
         }
 
         async function selectTv(ip, port, apiVersion, name, el, context) {
@@ -1968,17 +2707,17 @@
                 return;
             }
 
-            // Auto-detect API version by probing the TV directly (iOS) or via server (browser)
-            let detected = IS_CAPACITOR ? await probeTvDirect(ip) : null;
+            const brand = getBrand();
+            let detected = IS_CAPACITOR ? await driverProbe(ip, brand) : null;
             if (!detected && !IS_CAPACITOR) {
                 try {
                     const r = await fetch(`/probe?ip=${encodeURIComponent(ip)}`);
                     if (r.ok) detected = await r.json();
                 } catch {}
             }
-            const port       = detected?.port       || 1925;
+            const port       = detected?.port       || BRANDS[brand]?.port || 1925;
             const apiVersion = detected?.apiVersion || 1;
-            const name       = detected?.name       || 'Philips TV';
+            const name       = detected?.name       || (BRANDS[brand]?.name || '') + ' TV';
 
             const closeUi = () => {
                 if (context === 'setup') document.getElementById('setupScreen').classList.remove('active');
@@ -2088,24 +2827,9 @@
         }
 
         async function sendKey(key) {
-            const base = getApiBase();
-            if (!base) { showStatus('error', 'Not configured'); return; }
-            const opts = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key }),
-            };
-            const doSend = () => apiFetch(base + '/input/key', opts);
             try {
-                let response;
-                try {
-                    response = await doSend();
-                } catch {
-                    // Retry once after 300ms (CapacitorHttp may need a moment on first use)
-                    await new Promise(r => setTimeout(r, 300));
-                    response = await doSend();
-                }
-                showStatus(response.ok ? 'connected' : 'error', response.ok ? 'Connected' : 'Error');
+                const ok = await driverSendKey(key);
+                showStatus(ok ? 'connected' : 'error', ok ? 'Connected' : 'Error');
             } catch {
                 showStatus('error', 'Offline');
             }
@@ -2113,25 +2837,34 @@
 
         async function setVolume(value) {
             document.getElementById('volumeValue').textContent = value;
-            try {
-                await apiFetch(`${getApiBase()}/audio/volume`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ current: parseInt(value), muted: false }),
-                });
-                showStatus('connected', `Vol: ${value}`);
-            } catch {
-                showStatus('error', 'Offline');
+            const ok = await driverSetVolume(value);
+            if (ok) showStatus('connected', `Vol: ${value}`);
+            else {
+                // For brands without volume set, send volume keys
+                const brand = getBrand();
+                if (brand === 'samsung' || brand === 'tcl' || brand === 'hisense') {
+                    showStatus('connected', `Vol: ${value}`);
+                } else {
+                    showStatus('error', 'Offline');
+                }
             }
         }
 
         async function setSource(id) {
+            const brand = getBrand();
             try {
-                await apiFetch(`${getApiBase()}/sources/current`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id }),
-                });
+                if (brand === 'philips') {
+                    await apiFetch(`${getApiBase()}/sources/current`, {
+                        method:'POST', headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify({id}),
+                    });
+                } else if (brand === 'lg') {
+                    await _lgRequest('ssap://tv/switchInput', {inputId: id});
+                } else if (brand === 'sony') {
+                    await _sonyRpc('avContent','setPlayContent',[{uri:id}]);
+                } else if (brand === 'tcl' || brand === 'hisense') {
+                    await fetch(`http://${localStorage.getItem('tvIp')}:${localStorage.getItem('tvPort')||8060}/keypress/${id}`, {method:'POST'});
+                }
                 showStatus('connected', 'Source OK');
             } catch {
                 showStatus('error', 'Offline');
@@ -2139,15 +2872,18 @@
         }
 
         async function getVolume() {
-            try {
-                const response = await apiFetch(`${getApiBase()}/audio/volume`);
-                if (!response.ok) throw new Error('Bad response');
-                const data = await response.json();
-                document.getElementById('volumeSlider').value = data.current;
-                document.getElementById('volumeValue').textContent = data.current;
+            const vol = await driverGetVolume();
+            if (vol) {
+                document.getElementById('volumeSlider').value = vol.current;
+                document.getElementById('volumeValue').textContent = vol.current;
+                if (vol.max) document.getElementById('volumeSlider').max = vol.max;
                 showStatus('connected', 'Connected');
-            } catch {
-                showStatus('error', 'Offline');
+            } else {
+                // For brands without volume GET, just check connectivity
+                const brand = getBrand();
+                if (brand === 'samsung' && _samsungConnected) showStatus('connected', 'Connected');
+                else if (brand === 'tcl' || brand === 'hisense' || brand === 'xiaomi') showStatus('connected', 'Connected');
+                else showStatus('error', 'Offline');
             }
         }
 
@@ -2183,27 +2919,123 @@
         // INIT
         // ============================================================
 
+        // ============================================================
+        // BRAND SELECTION
+        // ============================================================
+
+        function selectBrand(brand) {
+            localStorage.setItem('tvBrand', brand);
+            document.getElementById('brandSelectScreen').classList.remove('active');
+            document.getElementById('setupScreen').classList.add('active');
+            const info = BRANDS[brand];
+            document.getElementById('setupBrandMsg').textContent = `Find your ${info?.name || 'TV'} on the network`;
+            if (brand === 'philips') {
+                document.getElementById('setupWifiHint').style.display = '';
+            } else {
+                document.getElementById('setupWifiHint').style.display = 'none';
+            }
+        }
+
+        async function scanAllBrands() {
+            const btn = document.getElementById('brandScanAllBtn');
+            const list = document.getElementById('brandScanList');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Scanning...';
+            list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:11px;padding:8px;">Getting local IP...</div>';
+
+            try {
+                const localIp = await getLocalIpViaWebRTC();
+                let subnets;
+                if (localIp) {
+                    const parts = localIp.split('.');
+                    subnets = [`${parts[0]}.${parts[1]}.${parts[2]}`];
+                } else {
+                    subnets = ['192.168.31','192.168.1','192.168.0','192.168.100'];
+                }
+
+                list.innerHTML = `<div style="text-align:center;color:var(--text-secondary);font-size:11px;padding:8px;">Scanning ${subnets[0]}.0/24 with all protocols...</div>`;
+
+                let allTvs = [];
+                for (const subnet of subnets) {
+                    const tvs = await scanAllBrandsOnSubnet(subnet);
+                    allTvs.push(...tvs);
+                    if (allTvs.length > 0) break;
+                }
+
+                renderTvList(list, allTvs, 'brandScan');
+            } catch (err) {
+                list.innerHTML = `<div style="text-align:center;color:var(--danger);font-size:12px;padding:12px;">Scan failed: ${escHtml(String(err?.message||err))}</div>`;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/>
+                <path d="M20.2 20.2c2.4-2.4 3.8-5.5 3.8-8.2C24 5.4 18.6 0 12 0S0 5.4 0 12c0 2.7 1.4 5.8 3.8 8.2"/>
+                <path d="M16.9 16.9A7 7 0 0 0 19 12a7 7 0 0 0-7-7 7 7 0 0 0-7 7 7 7 0 0 0 2.1 4.9"/>
+            </svg> Scan Again`;
+        }
+
+        async function manualBrandConnect() {
+            const ip = document.getElementById('brandIpInput').value.trim();
+            const brand = document.getElementById('brandIpBrand').value;
+            if (!ip) return;
+            const octets = ip.split('.');
+            if (octets.length !== 4 || !octets.every(o => /^\d{1,3}$/.test(o) && +o <= 255)) {
+                alert('Please enter a valid IP address');
+                return;
+            }
+            localStorage.setItem('tvBrand', brand);
+            const detected = await driverProbe(ip, brand);
+            const port = detected?.port || BRANDS[brand]?.port || 1925;
+            const apiVersion = detected?.apiVersion || 1;
+            const name = detected?.name || BRANDS[brand]?.name + ' TV';
+            const closeUi = () => document.getElementById('brandSelectScreen').classList.remove('active');
+            await _connectTv(ip, port, apiVersion, name, closeUi);
+        }
+
+        // Override selectTv for brandScan context
+        const _origSelectTv = typeof selectTv === 'function' ? selectTv : null;
+
+        // ============================================================
+        // INIT
+        // ============================================================
+
         (async function init() {
             const config = await loadConfig();
+            const brand = localStorage.getItem('tvBrand');
 
-            if (config?.ip) {
+            if (config?.ip && brand) {
+                // TV and brand already configured
                 if (config.apiVersion) localStorage.setItem('tvApiVersion', config.apiVersion);
-                // Sync existing config to App Group UserDefaults so widget always has latest data.
-                await saveConfig(config.ip, parseInt(config.port) || 1925, parseInt(config.apiVersion) || 1);
+                await saveConfig(config.ip, parseInt(config.port) || BRANDS[brand]?.port || 1925, parseInt(config.apiVersion) || 1);
                 const name = localStorage.getItem('tvName');
                 if (name) document.getElementById('tvTitle').textContent = name.toUpperCase();
 
                 await Promise.all([
-                    loadTvCapabilities(),
+                    (getBrand() === 'philips' ? loadTvCapabilities() : Promise.resolve()),
                     initRevenueCat(),
                 ]);
 
                 if (!adsRemoved) await initAdMob();
 
+                // WebSocket brands need explicit connection
+                await driverConnect();
                 startPolling();
+                renderExtraButtons();
+            } else if (config?.ip && !brand) {
+                // Legacy: had Philips config but no brand set
+                localStorage.setItem('tvBrand', 'philips');
+                if (config.apiVersion) localStorage.setItem('tvApiVersion', config.apiVersion);
+                await saveConfig(config.ip, parseInt(config.port) || 1925, parseInt(config.apiVersion) || 1);
+                const name = localStorage.getItem('tvName');
+                if (name) document.getElementById('tvTitle').textContent = name.toUpperCase();
+                await Promise.all([loadTvCapabilities(), initRevenueCat()]);
+                if (!adsRemoved) await initAdMob();
+                startPolling();
+                renderExtraButtons();
             } else {
-                document.getElementById('setupScreen').classList.add('active');
-                // Still init purchases to check entitlement state
+                // No TV configured — show brand selection
+                document.getElementById('brandSelectScreen').classList.add('active');
                 await initRevenueCat();
             }
         })();

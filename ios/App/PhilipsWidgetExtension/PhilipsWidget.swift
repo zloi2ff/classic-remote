@@ -23,27 +23,49 @@ private enum Design {
     static let appGroupID   = "group.com.philips.remote"
 }
 
+// MARK: - Brand Metadata
+//
+// Maps the lowercase brand key stored in UserDefaults to a display name and SF Symbol.
+// Kept inside an enum namespace to satisfy AppIntentsSSUTraining build requirements.
+
+private enum BrandInfo {
+    struct Meta {
+        let displayName: String
+        let icon: String    // SF Symbol name
+    }
+
+    static func meta(for brand: String) -> Meta {
+        switch brand.lowercased() {
+        case "philips":  return Meta(displayName: "Philips",  icon: "tv")
+        case "sony":     return Meta(displayName: "Sony",     icon: "tv")
+        case "samsung":  return Meta(displayName: "Samsung",  icon: "tv")
+        case "lg":       return Meta(displayName: "LG",       icon: "tv")
+        case "tcl":      return Meta(displayName: "TCL",      icon: "tv")
+        case "hisense":  return Meta(displayName: "Hisense",  icon: "tv")
+        case "xiaomi":   return Meta(displayName: "Xiaomi",   icon: "tv")
+        default:         return Meta(displayName: "Classic",  icon: "tv")
+        }
+    }
+}
+
 // MARK: - Timeline Entry
 
 struct PhilipsEntry: TimelineEntry {
     let date: Date
     let tvIp: String?
     let isConfigured: Bool
+    let tvBrand: String     // lowercase brand key, e.g. "philips", "sony"
 }
 
 // MARK: - Timeline Provider
 
 struct PhilipsProvider: TimelineProvider {
     func placeholder(in context: Context) -> PhilipsEntry {
-        PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true)
+        PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true, tvBrand: "philips")
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PhilipsEntry) -> Void) {
-        if context.isPreview {
-            completion(PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true))
-        } else {
-            completion(makeEntry())
-        }
+        completion(makeEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PhilipsEntry>) -> Void) {
@@ -55,10 +77,12 @@ struct PhilipsProvider: TimelineProvider {
     private func makeEntry() -> PhilipsEntry {
         let defaults = UserDefaults(suiteName: Design.appGroupID)
         let ip = defaults?.string(forKey: "tvIp")
+        let brand = (defaults?.string(forKey: "tvBrand") ?? "philips").lowercased()
         return PhilipsEntry(
             date: .now,
             tvIp: ip,
-            isConfigured: !(ip ?? "").isEmpty
+            isConfigured: !(ip ?? "").isEmpty,
+            tvBrand: brand
         )
     }
 }
@@ -201,12 +225,19 @@ private struct NotConfiguredView: View {
 // MARK: - Header
 
 private struct WidgetHeader: View {
+    let brand: String   // lowercase brand key
+
+    private var meta: BrandInfo.Meta { BrandInfo.meta(for: brand) }
+
+    /// "PHILIPS REMOTE", "SONY REMOTE", etc.
+    private var title: String { "\(meta.displayName.uppercased()) REMOTE" }
+
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "tv")
+            Image(systemName: meta.icon)
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(Design.accent)
-            Text("CLASSIC REMOTE")
+            Text(title)
                 .font(.system(size: 8, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .tracking(1)
@@ -217,9 +248,11 @@ private struct WidgetHeader: View {
 // MARK: - Small Widget (2x2 grid)
 
 private struct SmallWidgetView: View {
+    let brand: String
+
     var body: some View {
         VStack(spacing: 6) {
-            WidgetHeader()
+            WidgetHeader(brand: brand)
 
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)],
@@ -238,10 +271,12 @@ private struct SmallWidgetView: View {
 // MARK: - Medium Widget (horizontal row with labels)
 
 private struct MediumWidgetView: View {
+    let brand: String
+
     var body: some View {
         VStack(spacing: 6) {
             HStack {
-                WidgetHeader()
+                WidgetHeader(brand: brand)
                 Spacer()
             }
 
@@ -271,9 +306,9 @@ struct PhilipsWidgetEntryView: View {
             } else {
                 switch family {
                 case .systemMedium:
-                    MediumWidgetView()
+                    MediumWidgetView(brand: entry.tvBrand)
                 default:
-                    SmallWidgetView()
+                    SmallWidgetView(brand: entry.tvBrand)
                 }
             }
         }
@@ -313,16 +348,28 @@ struct PhilipsWidget: Widget {
 
 // MARK: - Previews
 
-#Preview("Small", as: .systemSmall) {
+#Preview("Small – Philips", as: .systemSmall) {
     PhilipsWidget()
 } timeline: {
-    PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true)
-    PhilipsEntry(date: .now, tvIp: nil, isConfigured: false)
+    PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true,  tvBrand: "philips")
+    PhilipsEntry(date: .now, tvIp: nil,             isConfigured: false, tvBrand: "philips")
 }
 
-#Preview("Medium", as: .systemMedium) {
+#Preview("Small – Sony", as: .systemSmall) {
     PhilipsWidget()
 } timeline: {
-    PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true)
-    PhilipsEntry(date: .now, tvIp: nil, isConfigured: false)
+    PhilipsEntry(date: .now, tvIp: "192.168.1.101", isConfigured: true, tvBrand: "sony")
+}
+
+#Preview("Medium – TCL", as: .systemMedium) {
+    PhilipsWidget()
+} timeline: {
+    PhilipsEntry(date: .now, tvIp: "192.168.1.102", isConfigured: true, tvBrand: "tcl")
+}
+
+#Preview("Medium – Philips", as: .systemMedium) {
+    PhilipsWidget()
+} timeline: {
+    PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true,  tvBrand: "philips")
+    PhilipsEntry(date: .now, tvIp: nil,             isConfigured: false, tvBrand: "philips")
 }

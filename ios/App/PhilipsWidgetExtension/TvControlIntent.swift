@@ -12,6 +12,9 @@ private enum TvConfig {
         let apiVersion: Int
         let authUser: String
         let authPass: String
+        let brand: String    // "philips" | "sony" | "tcl" | "hisense" | "samsung" | "lg" | "xiaomi"
+        let token: String    // Samsung/LG WebSocket token (unused in widget — WebSocket not supported)
+        let psk: String      // Sony Pre-Shared Key
     }
 
     /// Validate RFC-1918 private IPv4 (widget can't reference TvConfigHandler from main target).
@@ -36,15 +39,74 @@ private enum TvConfig {
         let apiVersion = defaults.integer(forKey: "tvApiVersion")
         let authUser = defaults.string(forKey: "tvAuthUser") ?? ""
         let authPass = defaults.string(forKey: "tvAuthPass") ?? ""
+        let brand = (defaults.string(forKey: "tvBrand") ?? "philips").lowercased()
+        let token = defaults.string(forKey: "tvToken") ?? ""
+        let psk = defaults.string(forKey: "tvPsk") ?? ""
 
         return Config(
             ip: ip,
             port: port > 0 ? port : 1925,
             apiVersion: apiVersion > 0 ? apiVersion : 1,
             authUser: authUser,
-            authPass: authPass
+            authPass: authPass,
+            brand: brand,
+            token: token,
+            psk: psk
         )
     }
+}
+
+// MARK: - Brand Key Maps
+//
+// Keys are logical action names; values are the wire key names per brand.
+// Brands that reuse Roku ECP (TCL, Hisense) share the same map.
+
+private enum BrandKeyMaps {
+    /// Returns the wire key for a logical action on a given brand.
+    /// Returns nil when the brand has no mapping for that action (e.g. Xiaomi Mute).
+    static func key(for action: String, brand: String) -> String? {
+        guard let map = maps[brand], let value = map[action], !value.isEmpty else {
+            return nil
+        }
+        return value
+    }
+
+    private static let maps: [String: [String: String]] = [
+        "philips": [
+            "VolumeUp":   "VolumeUp",
+            "VolumeDown": "VolumeDown",
+            "Mute":       "Mute",
+            "Standby":    "Standby",
+        ],
+        "sony": [
+            // IRCC codes
+            "VolumeUp":   "AAAAAQAAAAEAAAASAw==",
+            "VolumeDown": "AAAAAQAAAAEAAAATAw==",
+            "Mute":       "AAAAAQAAAAEAAAAUAw==",
+            "Standby":    "AAAAAQAAAAEAAAAvAw==",
+        ],
+        "tcl": [
+            // Roku ECP key names
+            "VolumeUp":   "VolumeUp",
+            "VolumeDown": "VolumeDown",
+            "Mute":       "VolumeMute",
+            "Standby":    "Power",
+        ],
+        "hisense": [
+            // Roku ECP key names (Hisense Roku TVs)
+            "VolumeUp":   "VolumeUp",
+            "VolumeDown": "VolumeDown",
+            "Mute":       "VolumeMute",
+            "Standby":    "Power",
+        ],
+        "xiaomi": [
+            "VolumeUp":   "volumeup",
+            "VolumeDown": "volumedown",
+            "Mute":       "",   // not supported — empty string → skipped
+            "Standby":    "power",
+        ],
+        // samsung / lg intentionally omitted — WebSocket only, not supported in widget
+    ]
 }
 
 // MARK: - Base Key Sender
@@ -116,10 +178,36 @@ private enum TvSender {
         }
     }
 
-    static func sendKey(_ key: String) async throws {
+    /// Send a logical key action (e.g. "VolumeUp") to the configured TV.
+    /// The brand is read from TvConfig and determines the wire protocol and key name.
+    static func sendKey(_ action: String) async throws {
         guard let config = TvConfig.load() else {
             throw TvError.notConfigured
         }
+
+        switch config.brand {
+        case "philips":
+            try await sendPhilipsKey(action, config: config)
+        case "sony":
+            try await sendSonyKey(action, config: config)
+        case "tcl", "hisense":
+            try await sendRokuEcpKey(action, config: config)
+        case "xiaomi":
+            try await sendXiaomiKey(action, config: config)
+        case "samsung", "lg":
+            // WebSocket-based protocols are not supported in widget extensions.
+            // Silently no-op so the widget does not surface an error banner.
+            return
+        default:
+            // Unknown brand — fall back to Philips JointSpace so existing configs keep working.
+            try await sendPhilipsKey(action, config: config)
+        }
+    }
+
+    // MARK: Philips JointSpace
+
+    private static func sendPhilipsKey(_ action: String, config: TvConfig.Config) async throws {
+        guard let keyName = BrandKeyMaps.key(for: action, brand: "philips") else { return }
 
         let scheme = config.apiVersion >= 6 ? "https" : "http"
         let urlString = "\(scheme)://\(config.ip):\(config.port)/\(config.apiVersion)/input/key"
@@ -130,32 +218,113 @@ private enum TvSender {
         var request = URLRequest(url: url, timeoutInterval: 5)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(["key": key])
+        request.httpBody = try JSONEncoder().encode(["key": keyName])
 
-        // Create session per-request so credentials are always current
         let delegate = LocalNetworkDelegate(authUser: config.authUser, authPass: config.authPass)
         let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
 
-        let response: URLResponse
-        do {
-            (_, response) = try await session.data(for: request)
-        } catch let error as URLError {
-            switch error.code {
-            case .timedOut:            throw TvError.requestFailed("TV not responding")
-            case .cannotConnectToHost: throw TvError.requestFailed("Cannot reach TV")
-            default:                   throw TvError.requestFailed("Network error")
-            }
+        let (_, response) = try await session.data(for: request)
+
+        guard let http = response as? HTTPURLResponse,
+              (200...299).contains(http.statusCode) else {
+            throw TvError.requestFailed
+        }
+    }
+
+    // MARK: Sony IRCC (SOAP over HTTP)
+
+    private static func sendSonyKey(_ action: String, config: TvConfig.Config) async throws {
+        guard let irccCode = BrandKeyMaps.key(for: action, brand: "sony") else { return }
+
+        // Sony uses plain HTTP on port 80 with a Pre-Shared Key header.
+        let port = 80
+        let urlString = "http://\(config.ip):\(port)/sony/IRCC"
+        guard let url = URL(string: urlString) else {
+            throw TvError.invalidURL
         }
 
-        guard let http = response as? HTTPURLResponse else {
-            throw TvError.requestFailed()
+        let soapBody = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+          <s:Body>
+            <u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1">
+              <IRCCCode>\(irccCode)</IRCCCode>
+            </u:X_SendIRCC>
+          </s:Body>
+        </s:Envelope>
+        """
+
+        var request = URLRequest(url: url, timeoutInterval: 5)
+        request.httpMethod = "POST"
+        request.setValue("text/xml; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.setValue("\"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC\"",
+                         forHTTPHeaderField: "SOAPACTION")
+        if !config.psk.isEmpty {
+            request.setValue(config.psk, forHTTPHeaderField: "X-Auth-PSK")
         }
-        if http.statusCode == 401 {
-            throw TvError.requestFailed("Authentication failed. Reconfigure in app.")
+        request.httpBody = soapBody.data(using: .utf8)
+
+        // Sony uses HTTP (no SSL), but still reuse LocalNetworkDelegate for consistency.
+        let delegate = LocalNetworkDelegate(authUser: "", authPass: "")
+        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+
+        let (_, response) = try await session.data(for: request)
+
+        guard let http = response as? HTTPURLResponse,
+              (200...299).contains(http.statusCode) else {
+            throw TvError.requestFailed
         }
-        guard (200...299).contains(http.statusCode) else {
-            throw TvError.requestFailed("TV returned error \(http.statusCode)")
+    }
+
+    // MARK: Roku ECP (TCL, Hisense Roku TVs)
+
+    private static func sendRokuEcpKey(_ action: String, config: TvConfig.Config) async throws {
+        guard let keyName = BrandKeyMaps.key(for: action, brand: config.brand) else { return }
+
+        // Roku External Control Protocol: POST to port 8060, no body, no auth.
+        let urlString = "http://\(config.ip):8060/keypress/\(keyName)"
+        guard let url = URL(string: urlString) else {
+            throw TvError.invalidURL
+        }
+
+        var request = URLRequest(url: url, timeoutInterval: 5)
+        request.httpMethod = "POST"
+
+        let session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+
+        let (_, response) = try await session.data(for: request)
+
+        guard let http = response as? HTTPURLResponse,
+              (200...299).contains(http.statusCode) else {
+            throw TvError.requestFailed
+        }
+    }
+
+    // MARK: Xiaomi (REST GET)
+
+    private static func sendXiaomiKey(_ action: String, config: TvConfig.Config) async throws {
+        guard let keyName = BrandKeyMaps.key(for: action, brand: "xiaomi") else { return }
+
+        // Xiaomi TV controller REST API: GET on port 6095.
+        let urlString = "http://\(config.ip):6095/controller?action=keyevent&keycode=\(keyName)"
+        guard let url = URL(string: urlString) else {
+            throw TvError.invalidURL
+        }
+
+        var request = URLRequest(url: url, timeoutInterval: 5)
+        request.httpMethod = "GET"
+
+        let session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+
+        let (_, response) = try await session.data(for: request)
+
+        guard let http = response as? HTTPURLResponse,
+              (200...299).contains(http.statusCode) else {
+            throw TvError.requestFailed
         }
     }
 }
@@ -163,13 +332,13 @@ private enum TvSender {
 private enum TvError: LocalizedError {
     case notConfigured
     case invalidURL
-    case requestFailed(String = "TV did not respond.")
+    case requestFailed
 
     var errorDescription: String? {
         switch self {
-        case .notConfigured:         return "TV not configured. Open app to set up."
-        case .invalidURL:            return "Invalid TV address."
-        case .requestFailed(let msg): return msg
+        case .notConfigured: return "TV not configured. Open app to set up."
+        case .invalidURL:    return "Invalid TV address."
+        case .requestFailed: return "TV did not respond."
         }
     }
 }

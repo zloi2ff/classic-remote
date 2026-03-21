@@ -6,7 +6,13 @@ import WidgetKit
 /// and persists it to the App Group UserDefaults so the widget can read it.
 ///
 /// JS usage:
-///   window.webkit.messageHandlers.tvConfig.postMessage({ ip, port, apiVersion })
+///   window.webkit.messageHandlers.tvConfig.postMessage({
+///       ip, port, apiVersion,
+///       authUser, authPass,   // Philips Digest Auth
+///       brand,                // "philips" | "lg" | "samsung" | "sony" | "tcl" | "xiaomi" | "hisense"
+///       token,                // Samsung/LG session token
+///       psk,                  // Sony Pre-Shared Key
+///   })
 final class TvConfigHandler: NSObject, WKScriptMessageHandler {
 
     private static let appGroupID = "group.com.philips.remote"
@@ -27,12 +33,17 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
             return
         }
 
-        let port       = (body["port"]       as? Int) ?? 1925
-        let apiVersion = (body["apiVersion"] as? Int) ?? 1
+        let port       = (body["port"]       as? Int)    ?? 1925
+        let apiVersion = (body["apiVersion"] as? Int)    ?? 1
         let authUser   = (body["authUser"]   as? String) ?? ""
         let authPass   = (body["authPass"]   as? String) ?? ""
+        let brand      = (body["brand"]      as? String) ?? "philips"
+        let token      = (body["token"]      as? String) ?? ""
+        let psk        = (body["psk"]        as? String) ?? ""
 
-        persist(ip: ip, port: port, apiVersion: apiVersion, authUser: authUser, authPass: authPass)
+        persist(ip: ip, port: port, apiVersion: apiVersion,
+                authUser: authUser, authPass: authPass,
+                brand: brand, token: token, psk: psk)
     }
 
     // MARK: - Private
@@ -48,7 +59,9 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
         return privateRanges.contains(where: { ip.hasPrefix($0) })
     }
 
-    private func persist(ip: String, port: Int, apiVersion: Int, authUser: String, authPass: String) {
+    private func persist(ip: String, port: Int, apiVersion: Int,
+                         authUser: String, authPass: String,
+                         brand: String, token: String, psk: String) {
         guard let defaults = UserDefaults(suiteName: Self.appGroupID) else {
             print("[TvConfigHandler] Cannot open App Group UserDefaults — check entitlements.")
             return
@@ -59,10 +72,13 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
         defaults.set(apiVersion, forKey: "tvApiVersion")
         defaults.set(authUser,   forKey: "tvAuthUser")
         defaults.set(authPass,   forKey: "tvAuthPass")
+        defaults.set(brand,      forKey: "tvBrand")
+        defaults.set(token,      forKey: "tvToken")
+        defaults.set(psk,        forKey: "tvPsk")
 
         WidgetCenter.shared.reloadAllTimelines()
         #if DEBUG
-        print("[TvConfigHandler] Saved config — ip:\(ip) port:\(port) apiVersion:\(apiVersion)")
+        print("[TvConfigHandler] Saved config — ip:\(ip) port:\(port) apiVersion:\(apiVersion) brand:\(brand)")
         #endif
     }
 }
