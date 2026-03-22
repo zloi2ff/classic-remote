@@ -6,7 +6,7 @@
 
 Classic Remote does **not** collect, store, or transmit any personal data to external servers.
 
-All TV control commands are sent directly from your device to your Philips TV on your local network. No data leaves your home network.
+All TV control commands are sent directly from your device to your TV on your local network. No data leaves your home network.
 
 ## Advertising (free version)
 
@@ -31,7 +31,7 @@ See RevenueCat's privacy policy: https://www.revenuecat.com/privacy
 
 ## Local network access
 
-The app requires access to your local network to discover and control Philips TVs. This permission is requested at first launch. No network data is sent outside your local network.
+The app requires access to your local network to discover and control Smart TVs. This permission is requested at first launch. No network data is sent outside your local network.
 
 ## Data retention
 
@@ -44,4 +44,4 @@ This app does not knowingly collect data from children under 13.
 ## Contact
 
 Email: kultura.des@gmail.com
-GitHub: https://github.com/zloi2ff/philips-remote/issues
+GitHub: https://github.com/zloi2ff/classic-remote/issues

@@ -1,7 +1,7 @@
 <h1 align="center">Classic Remote</h1>
 
 <p align="center">
-  Веб-пульт для телевізора Philips Smart TV — працює у браузері, як PWA та нативний iOS-додаток з віджетом на домашньому екрані.
+  Мультибрендовий пульт для Smart TV (Philips, LG, Samsung, Sony, TCL, Xiaomi, Hisense) — працює у браузері, як PWA та нативний iOS-додаток з віджетом на домашньому екрані.
 </p>
 
 <p align="center">
@@ -107,7 +107,7 @@
 ### Браузер / PWA
 
 ```bash
-git clone https://github.com/zloi2ff/philips-remote.git
+git clone https://github.com/zloi2ff/classic-remote.git
 cd philips-remote
 python3 server.py
 ```

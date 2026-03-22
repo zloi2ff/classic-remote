@@ -1,7 +1,7 @@
 <h1 align="center">Classic Remote</h1>
 
 <p align="center">
-  Web-based remote control for Philips Smart TV — works as a browser app, PWA, and native iOS app with a Home Screen widget.
+  Multi-brand Smart TV remote control app (iOS + Web). Supports Philips, LG, Samsung, Sony, TCL, Xiaomi, Hisense. Works as a browser app, PWA, and native iOS app with a Home Screen widget.
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@
 - Quick source switching (TV, HDMI 3/4, SAT, Blu-ray, Game, Theater, SCART)
 
 **Smart connectivity**
-- Auto-discovery of Philips TVs on local network (/24 subnet scan)
+- Auto-discovery of Smart TVs on local network (/24 subnet scan)
 - PIN pairing for v6 TVs (2016+)
 - Supports API v1, v5 and v6 — auto-detected on connect
 
@@ -107,8 +107,8 @@ Transitional generation. Superset of v1 commands. Many v5 TVs also respond on `/
 ### Browser / PWA
 
 ```bash
-git clone https://github.com/zloi2ff/philips-remote.git
-cd philips-remote
+git clone https://github.com/zloi2ff/classic-remote.git
+cd classic-remote
 python3 server.py
 ```
 
@@ -150,7 +150,7 @@ The iOS app connects to the TV **directly** (no server needed) using `CapacitorH
          │                          │ direct HTTP/HTTPS
          ▼                          ▼
 ┌─────────────────┐        ┌──────────────────┐
-│   server.py     │        │  Philips TV      │
+│   server.py     │        │  Smart TV        │
 │  Python proxy   │───────▶│  port 1925/1926  │
 │  port 8888      │        │  JointSpace API  │
 └─────────────────┘        └──────────────────┘
@@ -182,7 +182,7 @@ The iOS app connects to the TV **directly** (no server needed) using `CapacitorH
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/discover` | GET | Scan local /24 subnet for Philips TVs |
+| `/discover` | GET | Scan local /24 subnet for Smart TVs |
 | `/config` | GET | Current TV IP/port/apiVersion |
 | `/config` | POST | Set TV config `{"ip":"…","port":…}` |
 | `/api/*` | ANY | Transparent proxy to TV |
@@ -206,9 +206,9 @@ RedColour · GreenColour · YellowColour · BlueColour
 Deploy on a home server so any device on your LAN can use the remote:
 
 ```bash
-scp server.py user@192.168.1.10:/opt/philips-remote/
-scp www/index.html user@192.168.1.10:/opt/philips-remote/www/
-ssh user@192.168.1.10 "sudo systemctl restart philips-remote"
+scp server.py user@192.168.1.10:/opt/classic-remote/
+scp www/index.html user@192.168.1.10:/opt/classic-remote/www/
+ssh user@192.168.1.10 "sudo systemctl restart classic-remote"
 ```
 
 Example systemd unit:
@@ -219,8 +219,8 @@ Description=Classic Remote
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /opt/philips-remote/server.py
-WorkingDirectory=/opt/philips-remote
+ExecStart=/usr/bin/python3 /opt/classic-remote/server.py
+WorkingDirectory=/opt/classic-remote
 Restart=always
 Environment=SERVER_PORT=8888
 

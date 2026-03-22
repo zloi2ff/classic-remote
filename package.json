@@ -1,7 +1,7 @@
 {
-  "name": "philips-remote",
-  "version": "1.1.0",
-  "description": "Remote control for Philips Smart TV (JointSpace API v1/v5/v6). Web app, PWA, and native iOS with WidgetKit.",
+  "name": "classic-remote",
+  "version": "2.0.0",
+  "description": "Multi-brand Smart TV remote control (Philips, LG, Samsung, Sony, TCL, Xiaomi, Hisense). Web app, PWA, and native iOS with WidgetKit.",
   "scripts": {
     "sync": "npx cap sync ios",
     "open": "npx cap open ios",
@@ -10,13 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zloi2ff/philips-remote.git"
+    "url": "git+https://github.com/zloi2ff/classic-remote.git"
   },
   "keywords": [
-    "philips",
     "tv",
     "remote",
-    "jointspace",
+    "philips",
+    "lg",
+    "samsung",
+    "sony",
     "capacitor",
     "ios",
     "widget"
@@ -25,9 +27,9 @@
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/zloi2ff/philips-remote/issues"
+    "url": "https://github.com/zloi2ff/classic-remote/issues"
   },
-  "homepage": "https://github.com/zloi2ff/philips-remote#readme",
+  "homepage": "https://github.com/zloi2ff/classic-remote#readme",
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",
     "@capacitor/browser": "^8.0.2",

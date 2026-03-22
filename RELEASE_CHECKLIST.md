@@ -42,8 +42,8 @@ rcApiKeyIos: 'appl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 ## Step 3 — App Store Connect
 
 1. Create app at https://appstoreconnect.apple.com
-   - Bundle ID: `com.philips.remote`
-   - SKU: `philips-remote`
+   - Bundle ID: `com.classic.remote`
+   - SKU: `classic-remote`
 
 2. Add In-App Purchase:
    - Type: **Non-Consumable**
