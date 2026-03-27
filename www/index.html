@@ -1271,8 +1271,7 @@
             if (!AdMob) return;
             try {
                 await AdMob.initialize({ initializeForTesting: false });
-                // ATT disabled for screenshots — re-enable before release
-                // try { await AdMob.requestTrackingAuthorization(); } catch {}
+                try { await AdMob.requestTrackingAuthorization(); } catch {}
                 await AdMob.showBanner({
                     adId:     MONETIZATION.admobBannerId,
                     adSize:   'ADAPTIVE_BANNER',
@@ -1444,6 +1443,7 @@
             localStorage.removeItem('tvIp');
             localStorage.removeItem('tvPort');
             localStorage.removeItem('tvName');
+            localStorage.removeItem('tvApiVersion');
             setTimeout(() => {
                 document.getElementById('brandSelectScreen').classList.add('active');
             }, 360);
@@ -2057,8 +2057,9 @@
             const res = await _lgRequest('ssap://com.webos.service.networkinput/getPointerInputSocket');
             _lgPointerWs = new WebSocket(res.socketPath);
             return new Promise((resolve, reject) => {
-                _lgPointerWs.onopen = () => resolve();
-                _lgPointerWs.onerror = (e) => reject(e);
+                const timer = setTimeout(() => reject(new Error('Pointer socket timeout')), 5000);
+                _lgPointerWs.onopen = () => { clearTimeout(timer); resolve(); };
+                _lgPointerWs.onerror = (e) => { clearTimeout(timer); reject(e); };
             });
         }
 
@@ -2298,7 +2299,8 @@
 
         async function driverSendKey(universalKey) {
             const brand = getBrand();
-            const mapped = KEY_MAPS[brand]?.[universalKey] || universalKey;
+            const mapped = KEY_MAPS[brand]?.[universalKey] ?? universalKey;
+            if (mapped === '') return false; // unsupported key for this brand
             if (!mapped) return false;
             switch (brand) {
                 case 'philips': return await _philipsSendKey(mapped);
@@ -3050,44 +3052,8 @@
                 startPolling();
                 renderExtraButtons();
             } else {
-                // SCREENSHOT MOCK MODE — auto-removes after first use
-                const _mockBrand = localStorage.getItem('_mock');
-                if (_mockBrand) localStorage.removeItem('_mock');
-                if (_mockBrand === 'philips') {
-                    localStorage.setItem('tvBrand', 'philips');
-                    localStorage.setItem('tvIp', '192.168.1.100');
-                    localStorage.setItem('tvPort', '1925');
-                    localStorage.setItem('tvApiVersion', '1');
-                    localStorage.setItem('tvName', '55" Philips 7304');
-                    document.getElementById('tvTitle').textContent = '55" PHILIPS 7304';
-                    document.getElementById('volumeSlider').value = 21;
-                    document.getElementById('volumeValue').textContent = '21';
-                    showStatus('connected', 'Connected');
-                    renderExtraButtons();
-                } else if (localStorage.getItem('_mock') === 'samsung') {
-                    localStorage.setItem('tvBrand', 'samsung');
-                    localStorage.setItem('tvIp', '192.168.1.101');
-                    localStorage.setItem('tvPort', '8001');
-                    localStorage.setItem('tvName', 'Samsung Q8 Series');
-                    document.getElementById('tvTitle').textContent = 'SAMSUNG Q8 SERIES';
-                    document.getElementById('volumeSlider').value = 35;
-                    document.getElementById('volumeValue').textContent = '35';
-                    showStatus('connected', 'Connected');
-                    renderExtraButtons();
-                } else if (localStorage.getItem('_mock') === 'lg') {
-                    localStorage.setItem('tvBrand', 'lg');
-                    localStorage.setItem('tvIp', '192.168.1.102');
-                    localStorage.setItem('tvPort', '3000');
-                    localStorage.setItem('tvName', 'LG OLED C3');
-                    document.getElementById('tvTitle').textContent = 'LG OLED C3';
-                    document.getElementById('volumeSlider').value = 18;
-                    document.getElementById('volumeValue').textContent = '18';
-                    showStatus('connected', 'Connected');
-                    renderExtraButtons();
-                } else {
-                    // No TV configured — show brand selection
-                    document.getElementById('brandSelectScreen').classList.add('active');
-                }
+                // No TV configured — show brand selection
+                document.getElementById('brandSelectScreen').classList.add('active');
                 await initRevenueCat();
             }
         })();
