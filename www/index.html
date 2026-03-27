@@ -2055,7 +2055,12 @@
 
         async function _lgOpenPointerSocket(ip) {
             const res = await _lgRequest('ssap://com.webos.service.networkinput/getPointerInputSocket');
-            _lgPointerWs = new WebSocket(res.socketPath);
+            const _ptrUrl = res.socketPath;
+            try {
+                const _u = new URL(_ptrUrl);
+                if (_u.hostname !== localStorage.getItem('tvIp')) throw new Error('Unexpected host');
+            } catch (e) { throw new Error('Invalid pointer socket URL: ' + e.message); }
+            _lgPointerWs = new WebSocket(_ptrUrl);
             return new Promise((resolve, reject) => {
                 const timer = setTimeout(() => reject(new Error('Pointer socket timeout')), 5000);
                 _lgPointerWs.onopen = () => { clearTimeout(timer); resolve(); };
@@ -2120,7 +2125,7 @@
                 const token = localStorage.getItem('samsung_token_' + ip);
                 const name64 = btoa('ClassicRemote');
                 let url = 'ws://' + ip + ':8001/api/v2/channels/samsung.remote.control?name=' + name64;
-                if (token) url += '&token=' + token;
+                if (token) url += '&token=' + encodeURIComponent(token);
                 _samsungWs = new WebSocket(url);
                 _samsungWs.onopen = () => {};
                 _samsungWs.onmessage = (evt) => {
@@ -2238,7 +2243,7 @@
             const ip = localStorage.getItem('tvIp');
             const port = localStorage.getItem('tvPort') || '8060';
             try {
-                const r = await fetch(`http://${ip}:${port}/keypress/${key}`, {method:'POST'});
+                const r = await fetch(`http://${ip}:${port}/keypress/${encodeURIComponent(key)}`, {method:'POST'});
                 return r.ok || r.status === 202;
             } catch { return false; }
         }
@@ -2696,8 +2701,11 @@
             if (title) title.textContent = BRANDS[brand]?.name || '';
             if (container && extra.length > 0) {
                 container.innerHTML = extra.map(b =>
-                    `<button class="btn" onclick="sendKey('${escHtml(b.key)}')" ${!b.key ? 'disabled' : ''}>${b.icon} ${escHtml(b.label)}</button>`
+                    `<button class="btn extra-btn" data-key="${escHtml(b.key)}" ${!b.key ? 'disabled' : ''}>${b.icon} ${escHtml(b.label)}</button>`
                 ).join('');
+                container.querySelectorAll('.extra-btn').forEach(btn => {
+                    btn.addEventListener('click', () => sendKey(btn.dataset.key));
+                });
                 attachTouchFeedback(container.querySelectorAll('.btn'));
             } else if (container) {
                 container.innerHTML = '';
