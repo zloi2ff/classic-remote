@@ -1338,7 +1338,8 @@
         }
 
         function syncProUI() {
-            const proSection = document.getElementById('proSection'); if (proSection && !isNative()) { proSection.style.display = 'none'; return; }
+            const proSection = document.getElementById('proSection');
+            if (proSection && (!isNative() || MONETIZATION.rcApiKeyIos.startsWith('test_'))) { proSection.style.display = 'none'; return; }
             const btn      = document.getElementById('removeAdsBtn');
             const badge    = document.getElementById('proBadge');
             const subtitle = document.getElementById('removeAdsSubtitle');
@@ -1522,6 +1523,7 @@
         // ============================================================
 
         function leaveReview() {
+            if (!MONETIZATION.appStoreId || MONETIZATION.appStoreId.includes('X')) return;
             openUrl(`https://apps.apple.com/app/id${MONETIZATION.appStoreId}?action=write-review`);
         }
 
@@ -3030,6 +3032,7 @@
         // ============================================================
 
         (async function init() {
+          try {
             const config = await loadConfig();
             const brand = localStorage.getItem('tvBrand');
 
@@ -3067,6 +3070,10 @@
                 document.getElementById('brandSelectScreen').classList.add('active');
                 await initRevenueCat();
             }
+          } catch (e) {
+            console.error('[init] Fatal:', e);
+            document.getElementById('brandSelectScreen')?.classList.add('active');
+          }
         })();
     </script>
 </body>
