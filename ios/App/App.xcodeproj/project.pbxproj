@@ -419,6 +419,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote.watchapp;
 				PRODUCT_NAME = ClassicRemoteWatch;
 				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -655,6 +656,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote.watchapp;
 				PRODUCT_NAME = ClassicRemoteWatch;
 				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
