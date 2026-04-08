@@ -27,6 +27,8 @@
 		AA000003000000000000CC01 /* TvControlIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000003000000000000CC00 /* TvControlIntent.swift */; };
 		AA000005000000000000EE01 /* PhilipsWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA000004000000000000DD00 /* PhilipsWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AA000011000000000000PP01 /* TvConfigPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000011000000000000PP00 /* TvConfigPlugin.swift */; };
+		AA000020000000000000WS01 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000020000000000000WS00 /* WatchSessionManager.swift */; };
+		AA000021000000000000WR01 /* WatchSessionReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000021000000000000WR00 /* WatchSessionReceiver.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,7 +91,9 @@
 		95645BD88E8126690518CE4B /* ClassicRemoteWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClassicRemoteWatchApp.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		99CCEE52AB3B755887C60990 /* ClassicRemoteWatch.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = ClassicRemoteWatch.entitlements; sourceTree = "<group>"; };
+		AA000021000000000000WR00 /* WatchSessionReceiver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSessionReceiver.swift; sourceTree = "<group>"; };
 		AA000001000000000000AA00 /* TvConfigHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvConfigHandler.swift; sourceTree = "<group>"; };
+		AA000020000000000000WS00 /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
 		AA000002000000000000BB00 /* PhilipsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhilipsWidget.swift; sourceTree = "<group>"; };
 		AA000003000000000000CC00 /* TvControlIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvControlIntent.swift; sourceTree = "<group>"; };
 		AA000004000000000000DD00 /* PhilipsWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PhilipsWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -163,6 +167,7 @@
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				AA000001000000000000AA00 /* TvConfigHandler.swift */,
 				AA000011000000000000PP00 /* TvConfigPlugin.swift */,
+				AA000020000000000000WS00 /* WatchSessionManager.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -197,6 +202,7 @@
 				95645BD88E8126690518CE4B /* ClassicRemoteWatchApp.swift */,
 				E9A2A9010FA88BF71096391B /* ContentView.swift */,
 				612F5A7162709680C0E9E25E /* TvController.swift */,
+				AA000021000000000000WR00 /* WatchSessionReceiver.swift */,
 				99CCEE52AB3B755887C60990 /* ClassicRemoteWatch.entitlements */,
 				586C69A2F99A9F13DC27081E /* Info.plist */,
 				63C7D38029ABD3EEE54471BD /* Assets.xcassets */,
@@ -348,6 +354,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				AA000001000000000000AA01 /* TvConfigHandler.swift in Sources */,
 				AA000011000000000000PP01 /* TvConfigPlugin.swift in Sources */,
+				AA000020000000000000WS01 /* WatchSessionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -367,6 +374,7 @@
 				478D83703708C10888874E13 /* ClassicRemoteWatchApp.swift in Sources */,
 				7A1EA40E0B58C475425BD6DE /* ContentView.swift in Sources */,
 				7129D0134357C7FA770F83CA /* TvController.swift in Sources */,
+				AA000021000000000000WR01 /* WatchSessionReceiver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

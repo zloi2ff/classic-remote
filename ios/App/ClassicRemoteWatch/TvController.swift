@@ -46,8 +46,10 @@ enum TvConfig {
     }
 
     static func load() -> Config? {
+        // On watchOS, App Group UserDefaults is not accessible — use standard defaults.
+        // Data is written here by WatchSessionReceiver from WatchConnectivity.
+        let defaults = UserDefaults.standard
         guard
-            let defaults = UserDefaults(suiteName: appGroupID),
             let ip = defaults.string(forKey: "tvIp"),
             !ip.isEmpty,
             isPrivateIPv4(ip)

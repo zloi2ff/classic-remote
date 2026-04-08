@@ -77,6 +77,19 @@ final class TvConfigHandler: NSObject, WKScriptMessageHandler {
         defaults.set(psk,        forKey: "tvPsk")
 
         WidgetCenter.shared.reloadAllTimelines()
+
+        // Send config to Apple Watch via WatchConnectivity
+        WatchSessionManager.shared.sendConfig([
+            "tvIp": ip,
+            "tvPort": port,
+            "tvApiVersion": apiVersion,
+            "tvAuthUser": authUser,
+            "tvAuthPass": authPass,
+            "tvBrand": brand,
+            "tvToken": token,
+            "tvPsk": psk,
+        ])
+
         #if DEBUG
         print("[TvConfigHandler] Saved config — ip:\(ip) port:\(port) apiVersion:\(apiVersion) brand:\(brand)")
         #endif

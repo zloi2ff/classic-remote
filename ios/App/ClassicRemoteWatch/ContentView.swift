@@ -128,6 +128,9 @@ struct ContentView: View {
         }
         .onAppear {
             controller.reload()
+            WatchSessionReceiver.shared.onConfigReceived = { [weak controller] in
+                controller?.reload()
+            }
         }
     }
 
