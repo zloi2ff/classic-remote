@@ -320,6 +320,38 @@ private struct MediumWidgetView: View {
     }
 }
 
+// MARK: - Large Widget (2 rows × 3 columns)
+
+private struct LargeWidgetView: View {
+    let brand: String
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+    ]
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack {
+                WidgetHeader(brand: brand)
+                Spacer()
+            }
+
+            LazyVGrid(columns: columns, spacing: 8) {
+                TvButtonView(icon: "speaker.plus.fill",          label: "Vol +",  intent: VolumeUpIntent(),   showLabel: true)
+                TvButtonView(icon: "speaker.minus.fill",         label: "Vol -",  intent: VolumeDownIntent(), showLabel: true)
+                TvButtonView(icon: "speaker.slash.fill",         label: "Mute",   intent: MuteIntent(),       showLabel: true)
+                TvButtonView(icon: "plus.rectangle.on.rectangle",  label: "CH +",   intent: ChannelUpIntent(),  showLabel: true)
+                TvButtonView(icon: "minus.rectangle.on.rectangle", label: "CH -",   intent: ChannelDownIntent(),showLabel: true)
+                TvButtonView(icon: "power",                      label: "Power",  intent: StandbyIntent(),    isPower: true, showLabel: true)
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+    }
+}
+
 // MARK: - Accessory Circular (Lock Screen — single Power button)
 
 private struct AccessoryCircularView: View {
@@ -405,6 +437,8 @@ struct PhilipsWidgetEntryView: View {
                     UnsupportedBrandView(brand: entry.tvBrand)
                 } else {
                     switch family {
+                    case .systemLarge:
+                        LargeWidgetView(brand: entry.tvBrand)
                     case .systemMedium:
                         MediumWidgetView(brand: entry.tvBrand)
                     default:
@@ -428,6 +462,8 @@ struct PhilipsWidgetBundle: WidgetBundle {
             VolumeDownControl()
             MuteControl()
             PowerControl()
+            ChannelUpControl()
+            ChannelDownControl()
         }
     }
 }
@@ -486,6 +522,32 @@ struct PowerControl: ControlWidget {
     }
 }
 
+@available(iOS 18.0, *)
+struct ChannelUpControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "ChannelUpControl") {
+            ControlWidgetButton(action: ChannelUpIntent()) {
+                Label("Channel Up", systemImage: "plus.rectangle.on.rectangle")
+            }
+        }
+        .displayName("Channel Up")
+        .description("Switch to next TV channel.")
+    }
+}
+
+@available(iOS 18.0, *)
+struct ChannelDownControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "ChannelDownControl") {
+            ControlWidgetButton(action: ChannelDownIntent()) {
+                Label("Channel Down", systemImage: "minus.rectangle.on.rectangle")
+            }
+        }
+        .displayName("Channel Down")
+        .description("Switch to previous TV channel.")
+    }
+}
+
 // MARK: - Widget Configuration
 
 struct PhilipsWidget: Widget {
@@ -506,6 +568,7 @@ struct PhilipsWidget: Widget {
         .supportedFamilies([
             .systemSmall,
             .systemMedium,
+            .systemLarge,
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline,
@@ -539,6 +602,19 @@ struct PhilipsWidget: Widget {
 } timeline: {
     PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true,  tvBrand: "philips")
     PhilipsEntry(date: .now, tvIp: nil,             isConfigured: false, tvBrand: "philips")
+}
+
+#Preview("Large – Philips", as: .systemLarge) {
+    PhilipsWidget()
+} timeline: {
+    PhilipsEntry(date: .now, tvIp: "192.168.1.100", isConfigured: true,  tvBrand: "philips")
+    PhilipsEntry(date: .now, tvIp: nil,             isConfigured: false, tvBrand: "philips")
+}
+
+#Preview("Large – Sony", as: .systemLarge) {
+    PhilipsWidget()
+} timeline: {
+    PhilipsEntry(date: .now, tvIp: "192.168.1.101", isConfigured: true, tvBrand: "sony")
 }
 
 #Preview("Circular – Power", as: .accessoryCircular) {

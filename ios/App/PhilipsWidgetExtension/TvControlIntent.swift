@@ -74,37 +74,47 @@ private enum BrandKeyMaps {
 
     private static let maps: [String: [String: String]] = [
         "philips": [
-            "VolumeUp":   "VolumeUp",
-            "VolumeDown": "VolumeDown",
-            "Mute":       "Mute",
-            "Standby":    "Standby",
+            "VolumeUp":    "VolumeUp",
+            "VolumeDown":  "VolumeDown",
+            "Mute":        "Mute",
+            "Standby":     "Standby",
+            "ChannelUp":   "ChannelStepUp",
+            "ChannelDown": "ChannelStepDown",
         ],
         "sony": [
             // IRCC codes
-            "VolumeUp":   "AAAAAQAAAAEAAAASAw==",
-            "VolumeDown": "AAAAAQAAAAEAAAATAw==",
-            "Mute":       "AAAAAQAAAAEAAAAUAw==",
-            "Standby":    "AAAAAQAAAAEAAAAvAw==",
+            "VolumeUp":    "AAAAAQAAAAEAAAASAw==",
+            "VolumeDown":  "AAAAAQAAAAEAAAATAw==",
+            "Mute":        "AAAAAQAAAAEAAAAUAw==",
+            "Standby":     "AAAAAQAAAAEAAAAvAw==",
+            "ChannelUp":   "AAAAAQAAAAEAAAAQAw==",
+            "ChannelDown": "AAAAAQAAAAEAAAARAw==",
         ],
         "tcl": [
             // Roku ECP key names
-            "VolumeUp":   "VolumeUp",
-            "VolumeDown": "VolumeDown",
-            "Mute":       "VolumeMute",
-            "Standby":    "Power",
+            "VolumeUp":    "VolumeUp",
+            "VolumeDown":  "VolumeDown",
+            "Mute":        "VolumeMute",
+            "Standby":     "Power",
+            "ChannelUp":   "ChannelUp",
+            "ChannelDown": "ChannelDown",
         ],
         "hisense": [
             // Roku ECP key names (Hisense Roku TVs)
-            "VolumeUp":   "VolumeUp",
-            "VolumeDown": "VolumeDown",
-            "Mute":       "VolumeMute",
-            "Standby":    "Power",
+            "VolumeUp":    "VolumeUp",
+            "VolumeDown":  "VolumeDown",
+            "Mute":        "VolumeMute",
+            "Standby":     "Power",
+            "ChannelUp":   "ChannelUp",
+            "ChannelDown": "ChannelDown",
         ],
         "xiaomi": [
-            "VolumeUp":   "volumeup",
-            "VolumeDown": "volumedown",
-            "Mute":       "",   // not supported — empty string → skipped
-            "Standby":    "power",
+            "VolumeUp":    "volumeup",
+            "VolumeDown":  "volumedown",
+            "Mute":        "",   // not supported — empty string → skipped
+            "Standby":     "power",
+            "ChannelUp":   "channelup",
+            "ChannelDown": "channeldown",
         ],
         // samsung / lg intentionally omitted — WebSocket only, not supported in widget
     ]
@@ -392,6 +402,30 @@ struct StandbyIntent: AppIntent {
     }
 }
 
+// MARK: - ChannelUpIntent
+
+struct ChannelUpIntent: AppIntent {
+    static let title: LocalizedStringResource = "Channel Up"
+
+    func perform() async throws -> some IntentResult {
+        AudioServicesPlaySystemSound(1104)
+        try await TvSender.sendKey("ChannelUp")
+        return .result()
+    }
+}
+
+// MARK: - ChannelDownIntent
+
+struct ChannelDownIntent: AppIntent {
+    static let title: LocalizedStringResource = "Channel Down"
+
+    func perform() async throws -> some IntentResult {
+        AudioServicesPlaySystemSound(1104)
+        try await TvSender.sendKey("ChannelDown")
+        return .result()
+    }
+}
+
 // MARK: - AppShortcutsProvider
 
 struct ClassicRemoteShortcuts: AppShortcutsProvider {
@@ -435,6 +469,26 @@ struct ClassicRemoteShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Turn Off TV",
             systemImageName: "power"
+        )
+        AppShortcut(
+            intent: ChannelUpIntent(),
+            phrases: [
+                "Channel up with \(.applicationName)",
+                "Next channel with \(.applicationName)",
+                "Switch channel up with \(.applicationName)",
+            ],
+            shortTitle: "Channel Up",
+            systemImageName: "plus.rectangle.on.rectangle"
+        )
+        AppShortcut(
+            intent: ChannelDownIntent(),
+            phrases: [
+                "Channel down with \(.applicationName)",
+                "Previous channel with \(.applicationName)",
+                "Switch channel down with \(.applicationName)",
+            ],
+            shortTitle: "Channel Down",
+            systemImageName: "minus.rectangle.on.rectangle"
         )
     }
 }

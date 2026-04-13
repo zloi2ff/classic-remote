@@ -34,7 +34,7 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Local network access is required to discover and control your Smart TV.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to show you relevant ads. You can remove ads permanently with a one-time purchase in Settings.</string>
+	<string>This identifier is used to show you relevant ads.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

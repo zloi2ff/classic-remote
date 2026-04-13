@@ -46,9 +46,7 @@ enum TvConfig {
     }
 
     static func load() -> Config? {
-        // On watchOS, App Group UserDefaults is not accessible — use standard defaults.
-        // Data is written here by WatchSessionReceiver from WatchConnectivity.
-        let defaults = UserDefaults.standard
+        let defaults = UserDefaults(suiteName: "group.com.philips.remote") ?? .standard
         guard
             let ip = defaults.string(forKey: "tvIp"),
             !ip.isEmpty,
@@ -91,6 +89,11 @@ enum BrandKeyMaps {
             "VolumeDown": "VolumeDown",
             "Mute":       "Mute",
             "Standby":    "Standby",
+            "Up":         "CursorUp",
+            "Down":       "CursorDown",
+            "Left":       "CursorLeft",
+            "Right":      "CursorRight",
+            "Ok":         "Confirm",
         ],
         "sony": [
             // IRCC codes (base64-encoded IR commands)
@@ -98,6 +101,11 @@ enum BrandKeyMaps {
             "VolumeDown": "AAAAAQAAAAEAAAATAw==",
             "Mute":       "AAAAAQAAAAEAAAAUAw==",
             "Standby":    "AAAAAQAAAAEAAAAvAw==",
+            "Up":         "AAAAAQAAAAEAAAB0Aw==",
+            "Down":       "AAAAAQAAAAEAAAB1Aw==",
+            "Left":       "AAAAAQAAAAEAAAB2Aw==",
+            "Right":      "AAAAAQAAAAEAAAB3Aw==",
+            "Ok":         "AAAAAQAAAAEAAABlAw==",
         ],
         "tcl": [
             // Roku ECP key names
@@ -105,6 +113,11 @@ enum BrandKeyMaps {
             "VolumeDown": "VolumeDown",
             "Mute":       "VolumeMute",
             "Standby":    "Power",
+            "Up":         "Up",
+            "Down":       "Down",
+            "Left":       "Left",
+            "Right":      "Right",
+            "Ok":         "Select",
         ],
         "hisense": [
             // Roku ECP key names (Hisense Roku TVs)
@@ -112,12 +125,22 @@ enum BrandKeyMaps {
             "VolumeDown": "VolumeDown",
             "Mute":       "VolumeMute",
             "Standby":    "Power",
+            "Up":         "Up",
+            "Down":       "Down",
+            "Left":       "Left",
+            "Right":      "Right",
+            "Ok":         "Select",
         ],
         "xiaomi": [
             "VolumeUp":   "volumeup",
             "VolumeDown": "volumedown",
             "Mute":       "",       // not supported — empty string → skipped
             "Standby":    "power",
+            "Up":         "up",
+            "Down":       "down",
+            "Left":       "left",
+            "Right":      "right",
+            "Ok":         "ok",
         ],
         // samsung / lg intentionally omitted — WebSocket only, not supported in watch
     ]

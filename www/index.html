@@ -39,9 +39,19 @@
             --green-dark:     #1e8449;
             --btn-from:       #1a1a28;
             --btn-to:         #12121a;
-            --settings-bg:    #0a0a12;
+            --settings-bg:    #08080f;
             --settings-row:   #1a1a28;
             --settings-sep:   rgba(255,255,255,0.06);
+            --glass-bg:       rgba(22, 22, 38, 0.42);
+            --glass-border:   rgba(255, 255, 255, 0.16);
+            --glass-highlight: rgba(255, 255, 255, 0.06);
+            --glass-specular: rgba(255, 255, 255, 0.22);
+            --glass-shadow:   0 8px 40px rgba(0,0,0,0.50), inset 0 1.5px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.20);
+            --glass-blur:     blur(60px) saturate(220%) brightness(1.12);
+            --pill-bg:        rgba(255, 255, 255, 0.10);
+            --pill-border:    rgba(255, 255, 255, 0.20);
+            --icon-size:      32px;
+            --row-min-height: 54px;
             --overlay:        rgba(0,0,0,0.85);
         }
 
@@ -59,9 +69,17 @@
             --accent-dark:    #0062cc;
             --btn-from:       #e5e5ea;
             --btn-to:         #d1d1d6;
-            --settings-bg:    #f2f2f7;
+            --settings-bg:    #e8e8f0;
             --settings-row:   #ffffff;
             --settings-sep:   rgba(0,0,0,0.08);
+            --glass-bg:       rgba(255, 255, 255, 0.58);
+            --glass-border:   rgba(255, 255, 255, 0.80);
+            --glass-highlight: rgba(255, 255, 255, 0.40);
+            --glass-specular: rgba(255, 255, 255, 0.95);
+            --glass-shadow:   0 8px 32px rgba(0,0,0,0.12), inset 0 1.5px 0 rgba(255,255,255,0.90), inset 0 -1px 0 rgba(0,0,0,0.04);
+            --glass-blur:     blur(60px) saturate(200%) brightness(1.06);
+            --pill-bg:        rgba(0, 0, 0, 0.06);
+            --pill-border:    rgba(0, 0, 0, 0.10);
             --overlay:        rgba(0,0,0,0.5);
         }
 
@@ -80,9 +98,17 @@
                 --accent-dark:    #0062cc;
                 --btn-from:       #e5e5ea;
                 --btn-to:         #d1d1d6;
-                --settings-bg:    #f2f2f7;
+                --settings-bg:    #e8e8f0;
                 --settings-row:   #ffffff;
                 --settings-sep:   rgba(0,0,0,0.08);
+                --glass-bg:       rgba(255, 255, 255, 0.58);
+                --glass-border:   rgba(255, 255, 255, 0.80);
+                --glass-highlight: rgba(255, 255, 255, 0.40);
+                --glass-specular: rgba(255, 255, 255, 0.95);
+                --glass-shadow:   0 8px 32px rgba(0,0,0,0.12), inset 0 1.5px 0 rgba(255,255,255,0.90), inset 0 -1px 0 rgba(0,0,0,0.04);
+                --glass-blur:     blur(60px) saturate(200%) brightness(1.06);
+                --pill-bg:        rgba(0, 0, 0, 0.06);
+                --pill-border:    rgba(0, 0, 0, 0.10);
                 --overlay:        rgba(0,0,0,0.5);
             }
         }
@@ -128,7 +154,12 @@
             padding-bottom: max(env(safe-area-inset-bottom), 20px);
             flex-direction: column;
             justify-content: space-between;
-            background: var(--bg-primary);
+            background:
+                radial-gradient(ellipse at 15% 18%, rgba(88,56,214,0.55) 0%, transparent 42%),
+                radial-gradient(ellipse at 85% 60%, rgba(0,100,255,0.40) 0%, transparent 42%),
+                radial-gradient(ellipse at 45% 88%, rgba(40,180,80,0.28) 0%, transparent 42%),
+                radial-gradient(ellipse at 70% 15%, rgba(200,60,180,0.22) 0%, transparent 36%),
+                #0c0b14;
         }
 
         .page.active { display: flex; }
@@ -189,43 +220,52 @@
         .status.error     { background: rgba(231,76,60,0.15);  color: var(--danger); }
         .status.scanning  { background: rgba(52,152,219,0.15); color: var(--accent); }
 
-        /* Buttons */
+        /* Buttons — Liquid Glass */
         .btn {
-            background: linear-gradient(180deg, var(--btn-from) 0%, var(--btn-to) 100%);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.09);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 10px;
             color: var(--text-primary);
             font-size: 12px;
             cursor: pointer;
-            transition: all 0.1s;
+            transition: transform 0.1s, background 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), 0 2px 8px rgba(0,0,0,0.30);
         }
 
         .btn:not(.power):active,
         .btn:not(.power).flash {
             transform: scale(0.92);
             background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%) !important;
+            border-color: transparent !important;
+            box-shadow: 0 2px 14px rgba(0,122,255,0.45) !important;
         }
 
         .btn.power {
-            background: linear-gradient(180deg, #c0392b 0%, #962020 100%);
+            background: linear-gradient(160deg, #e53e2f 0%, #8b1a1a 100%);
             width: 42px; height: 42px;
             border-radius: 50%;
             border: none;
             flex-shrink: 0;
+            box-shadow: 0 2px 12px rgba(200,50,50,0.40), inset 0 1px 0 rgba(255,255,255,0.22);
         }
 
         .btn.power:active {
-            background: linear-gradient(180deg, var(--danger) 0%, #c0392b 100%);
+            background: linear-gradient(160deg, var(--danger) 0%, #c0392b 100%);
         }
 
         .btn.settings-btn {
             width: 42px; height: 42px;
             border-radius: 50%;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.09);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), 0 2px 8px rgba(0,0,0,0.25);
         }
 
         .btn:focus-visible, .discover-btn:focus-visible, .seg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -238,7 +278,11 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: var(--bg-card);
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.13);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 2px 8px rgba(0,0,0,0.25);
             padding: 10px 14px;
             border-radius: 14px;
         }
@@ -316,10 +360,11 @@
         .dpad .btn { width: 52px; height: 52px; font-size: 19px; }
 
         .dpad .btn.ok {
-            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+            background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
             border-radius: 50%;
             font-size: 13px; font-weight: 600;
             border: none;
+            box-shadow: 0 3px 14px rgba(0,122,255,0.45), inset 0 1px 0 rgba(255,255,255,0.28);
         }
 
         .dpad .empty { background: transparent; }
@@ -400,8 +445,11 @@
         /* Expand button */
         .expand-btn {
             width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.13);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
             border-radius: 12px;
             color: var(--text-secondary);
             font-size: 11px;
@@ -416,7 +464,7 @@
         }
 
         .page.expanded .expand-btn { margin-top: 10px; }
-        .expand-btn:active { background: rgba(128,128,128,0.15); }
+        .expand-btn:active { background: rgba(255,255,255,0.13); }
         .expand-btn .arrow { transition: transform 0.3s; font-size: 10px; }
         .expand-btn.expanded .arrow { transform: rotate(180deg); }
 
@@ -689,17 +737,23 @@
         .current-tv strong { color: var(--success); }
 
         /* ============================================================
-           SETTINGS PAGE (native-style slide-in)
+           SETTINGS PAGE — Liquid Glass (iOS 26)
         ============================================================ */
         .settings-page {
             position: fixed;
             inset: 0;
-            background: var(--settings-bg);
             z-index: 1100;
             transform: translateX(100%);
-            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex;
             flex-direction: column;
+            /* Vivid gradient mesh — visible through all glass layers */
+            background:
+                radial-gradient(ellipse at 15% 18%, rgba(88,56,214,0.55) 0%, transparent 42%),
+                radial-gradient(ellipse at 85% 60%, rgba(0,100,255,0.40) 0%, transparent 42%),
+                radial-gradient(ellipse at 45% 88%, rgba(40,180,80,0.28) 0%, transparent 42%),
+                radial-gradient(ellipse at 70% 15%, rgba(200,60,180,0.22) 0%, transparent 36%),
+                #0c0b14;
         }
 
         .settings-page.active { transform: translateX(0); }
@@ -711,8 +765,11 @@
             justify-content: space-between;
             padding: 12px 16px 8px;
             padding-top: max(env(safe-area-inset-top), 12px);
-            background: var(--settings-bg);
-            border-bottom: 1px solid var(--settings-sep);
+            background: transparent;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .settings-back {
@@ -738,89 +795,175 @@
 
         .settings-spacer { width: 60px; }
 
+        .settings-large-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 14px 20px 4px;
+        }
+
         .settings-body {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 16px;
+            background: transparent;
+            padding: 16px 16px;
             padding-bottom: max(calc(env(safe-area-inset-bottom) + 24px), 44px);
         }
 
         .settings-section { margin-bottom: 28px; }
 
         .settings-section-label {
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 400;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             margin-bottom: 8px;
-            padding-left: 4px;
+            padding-left: 16px;
         }
 
+        /* ── Liquid Glass Card ── */
         .settings-card {
-            background: var(--settings-row);
-            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 20px;
             overflow: hidden;
-            border: 1px solid var(--settings-sep);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            /* Subtle top-edge highlight strip */
+            position: relative;
+        }
+
+        /* Specular highlight layer at top of card */
+        .settings-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1.5px;
+            background: var(--glass-specular);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .settings-row {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
-            gap: 12px;
-            border-bottom: 1px solid var(--settings-sep);
+            padding: 0 16px;
+            min-height: var(--row-min-height, 54px);
+            gap: 14px;
+            position: relative;
+            transition: background 0.12s;
         }
 
-        .settings-row:last-child { border-bottom: none; }
+        /* Inset separator — starts after icon */
+        .settings-row::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: calc(16px + var(--icon-size, 32px) + 14px);
+            right: 0;
+            height: 0.5px;
+            background: var(--glass-border);
+        }
+
+        .settings-row:last-child::after { display: none; }
 
         .settings-row-tappable { cursor: pointer; }
-        .settings-row-tappable:active { background: rgba(128,128,128,0.15); }
+        .settings-row-tappable:active { background: rgba(255,255,255,0.07); }
 
-        .settings-row-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+        /* ── Colored icon badge with glass sheen ── */
+        .icon-badge {
+            width: var(--icon-size, 32px);
+            height: var(--icon-size, 32px);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #fff;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.30);
+        }
+
+        /* Glass sheen on badge */
+        .icon-badge::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(160deg, rgba(255,255,255,0.28) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .icon-badge svg { width: 18px; height: 18px; position: relative; z-index: 1; }
+
+        /* Fallback emoji icon */
+        .settings-row-icon { font-size: 20px; width: var(--icon-size, 32px); text-align: center; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
 
         .settings-row-content { flex: 1; min-width: 0; }
-        .settings-row-title { font-size: 15px; color: var(--text-primary); }
-        .settings-row-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .settings-row-title { font-size: 17px; color: var(--text-primary); }
+        .settings-row-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .settings-row-value { font-size: 14px; color: var(--text-secondary); flex-shrink: 0; }
+        .settings-row-value { font-size: 15px; color: var(--text-secondary); flex-shrink: 0; }
 
-        .settings-row-chevron { font-size: 20px; color: var(--text-muted); flex-shrink: 0; line-height: 1; }
+        .settings-row-chevron {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            opacity: 0.45;
+        }
 
+        .settings-row-chevron svg { width: 8px; height: 14px; }
+
+        /* ── Liquid Glass pill button ── */
         .settings-row-action {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            background: var(--pill-bg);
+            border: 1px solid var(--pill-border);
+            border-radius: 100px;
             color: var(--accent);
             font-size: 13px;
-            padding: 6px 14px;
+            font-weight: 500;
+            padding: 6px 16px;
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
         }
 
-        .settings-row-action:active { opacity: 0.7; }
-        .settings-row-action:disabled { opacity: 0.4; cursor: default; }
+        .settings-row-action:active { opacity: 0.65; }
+        .settings-row-action:disabled { opacity: 0.35; cursor: default; }
 
         .settings-row-action.primary {
-            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+            background: var(--accent);
+            border-color: transparent;
             color: #fff;
-            border: none;
+            box-shadow: 0 2px 10px rgba(0,122,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
         }
 
         .settings-row-action.success {
-            background: linear-gradient(180deg, #27ae60 0%, var(--green-dark) 100%);
+            background: #30d158;
+            border-color: transparent;
             color: #fff;
-            border: none;
+            box-shadow: 0 2px 10px rgba(48,209,88,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
         }
 
-        /* Segmented control for theme */
+        /* ── Segmented control ── */
         .settings-segmented {
             display: flex;
-            background: var(--bg-secondary);
-            border-radius: 8px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
             padding: 2px;
-            gap: 2px;
+            gap: 0;
             flex-shrink: 0;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .seg-btn {
@@ -828,16 +971,20 @@
             border: none;
             color: var(--text-secondary);
             font-size: 12px;
+            font-weight: 500;
             padding: 5px 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.18s;
             white-space: nowrap;
         }
 
         .seg-btn.active {
-            background: var(--accent);
-            color: #fff;
+            background: rgba(255,255,255,0.18);
+            color: var(--text-primary);
+            box-shadow:
+                0 1px 6px rgba(0,0,0,0.30),
+                inset 0 1px 0 rgba(255,255,255,0.32);
         }
 
         /* Pro badge */
@@ -851,6 +998,145 @@
             border-radius: 4px;
             margin-left: 6px;
             vertical-align: middle;
+        }
+
+        /* ============================================================
+           SETTINGS — light theme overrides
+        ============================================================ */
+        [data-theme="light"] .settings-page {
+            background:
+                radial-gradient(ellipse at 15% 18%, rgba(88,56,214,0.14) 0%, transparent 42%),
+                radial-gradient(ellipse at 85% 60%, rgba(0,100,255,0.10) 0%, transparent 42%),
+                radial-gradient(ellipse at 45% 88%, rgba(40,180,80,0.08) 0%, transparent 42%),
+                radial-gradient(ellipse at 70% 15%, rgba(200,60,180,0.07) 0%, transparent 36%),
+                #eeeef6;
+        }
+
+        [data-theme="light"] .settings-header {
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .settings-card {
+            background: rgba(255,255,255,0.60);
+            border-color: rgba(255,255,255,0.75);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08), inset 0 1.5px 0 rgba(255,255,255,0.90), inset 0 -1px 0 rgba(0,0,0,0.04);
+        }
+
+        [data-theme="light"] .settings-card::before {
+            background: rgba(255,255,255,0.95);
+        }
+
+        [data-theme="light"] .settings-row::after {
+            background: rgba(0,0,0,0.07);
+        }
+
+        [data-theme="light"] .settings-row-tappable:active {
+            background: rgba(0,0,0,0.04);
+        }
+
+        [data-theme="light"] .settings-row-action {
+            background: rgba(0,0,0,0.06);
+            border-color: rgba(0,0,0,0.10);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.70);
+        }
+
+        [data-theme="light"] .settings-segmented {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .seg-btn.active {
+            background: rgba(255,255,255,0.80);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.90);
+        }
+
+        [data-theme="light"] .settings-row-chevron {
+            color: rgba(0,0,0,0.35);
+            opacity: 1;
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-theme="system"] .settings-page {
+                background:
+                    radial-gradient(ellipse at 15% 18%, rgba(88,56,214,0.14) 0%, transparent 42%),
+                    radial-gradient(ellipse at 85% 60%, rgba(0,100,255,0.10) 0%, transparent 42%),
+                    radial-gradient(ellipse at 45% 88%, rgba(40,180,80,0.08) 0%, transparent 42%),
+                    radial-gradient(ellipse at 70% 15%, rgba(200,60,180,0.07) 0%, transparent 36%),
+                    #eeeef6;
+            }
+            [data-theme="system"] .settings-header { border-bottom-color: rgba(0,0,0,0.08); }
+            [data-theme="system"] .settings-card {
+                background: rgba(255,255,255,0.60);
+                border-color: rgba(255,255,255,0.75);
+                box-shadow: 0 4px 24px rgba(0,0,0,0.08), inset 0 1.5px 0 rgba(255,255,255,0.90), inset 0 -1px 0 rgba(0,0,0,0.04);
+            }
+            [data-theme="system"] .settings-card::before { background: rgba(255,255,255,0.95); }
+            [data-theme="system"] .settings-row::after { background: rgba(0,0,0,0.07); }
+            [data-theme="system"] .settings-row-tappable:active { background: rgba(0,0,0,0.04); }
+            [data-theme="system"] .settings-row-action { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.10); box-shadow: inset 0 1px 0 rgba(255,255,255,0.70); }
+            [data-theme="system"] .settings-segmented { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.08); }
+            [data-theme="system"] .seg-btn.active { background: rgba(255,255,255,0.80); box-shadow: 0 1px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.90); }
+            [data-theme="system"] .settings-row-chevron { color: rgba(0,0,0,0.35); opacity: 1; }
+        }
+
+        /* ============================================================
+           REMOTE PAGE — light theme overrides
+        ============================================================ */
+        [data-theme="light"] .page {
+            background:
+                radial-gradient(ellipse at 15% 18%, rgba(88,56,214,0.14) 0%, transparent 42%),
+                radial-gradient(ellipse at 85% 60%, rgba(0,100,255,0.10) 0%, transparent 42%),
+                radial-gradient(ellipse at 45% 88%, rgba(40,180,80,0.08) 0%, transparent 42%),
+                radial-gradient(ellipse at 70% 15%, rgba(200,60,180,0.07) 0%, transparent 36%),
+                #eeeef6;
+        }
+
+        [data-theme="light"] .btn {
+            background: rgba(255,255,255,0.65);
+            border-color: rgba(255,255,255,0.80);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 2px 8px rgba(0,0,0,0.10);
+            color: var(--text-primary);
+        }
+
+        [data-theme="light"] .btn.settings-btn {
+            background: rgba(255,255,255,0.65);
+            border-color: rgba(255,255,255,0.80);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .volume-slider,
+        [data-theme="light"] .expand-btn {
+            background: rgba(255,255,255,0.60);
+            border-color: rgba(255,255,255,0.78);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-theme="system"] .page {
+                background:
+                    radial-gradient(ellipse at 15% 18%, rgba(88,56,214,0.14) 0%, transparent 42%),
+                    radial-gradient(ellipse at 85% 60%, rgba(0,100,255,0.10) 0%, transparent 42%),
+                    radial-gradient(ellipse at 45% 88%, rgba(40,180,80,0.08) 0%, transparent 42%),
+                    radial-gradient(ellipse at 70% 15%, rgba(200,60,180,0.07) 0%, transparent 36%),
+                    #eeeef6;
+            }
+            [data-theme="system"] .btn {
+                background: rgba(255,255,255,0.65);
+                border-color: rgba(255,255,255,0.80);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 2px 8px rgba(0,0,0,0.10);
+                color: var(--text-primary);
+            }
+            [data-theme="system"] .btn.settings-btn {
+                background: rgba(255,255,255,0.65);
+                border-color: rgba(255,255,255,0.80);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 2px 6px rgba(0,0,0,0.08);
+            }
+            [data-theme="system"] .volume-slider,
+            [data-theme="system"] .expand-btn {
+                background: rgba(255,255,255,0.60);
+                border-color: rgba(255,255,255,0.78);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.90), 0 2px 6px rgba(0,0,0,0.08);
+            }
         }
 
         /* ============================================================
@@ -915,6 +1201,15 @@
 
     <!-- Brand Selection Screen (shown on first launch) -->
     <div class="brand-screen" id="brandSelectScreen">
+        <button id="brandBackBtn" onclick="cancelBrandChange()" aria-label="Back" style="display:none;position:absolute;top:max(env(safe-area-inset-top,0px),12px);left:12px;background:none;border:none;color:var(--text-secondary);padding:8px;cursor:pointer;z-index:1;line-height:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button onclick="openSettingsPage()" aria-label="Settings" style="position:absolute;top:max(env(safe-area-inset-top,0px),12px);right:12px;background:none;border:none;color:var(--text-secondary);padding:8px;cursor:pointer;z-index:1;line-height:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </button>
         <h1>Classic Remote</h1>
         <p>Choose your TV brand or scan all</p>
 
@@ -1103,7 +1398,7 @@
 
         <div class="collapsible" id="tvCollapsible">
             <div class="collapsible-content">
-                <div class="section">
+                <div class="section" id="playbackSection">
                     <div class="section-title">Playback</div>
                     <div class="playback-row">
                         <button class="btn" aria-label="Rewind" onclick="sendKey('Rewind')">⏪</button>
@@ -1117,7 +1412,7 @@
                     </div>
                 </div>
 
-                <div class="color-row">
+                <div class="color-row" id="colorBtnsSection">
                     <button class="btn color-red"    aria-label="Red" onclick="sendKey('Red')"></button>
                     <button class="btn color-green"  aria-label="Green" onclick="sendKey('Green')"></button>
                     <button class="btn color-yellow" aria-label="Yellow" onclick="sendKey('Yellow')"></button>
@@ -1195,6 +1490,24 @@
         </div>
     </div>
 
+    <!-- Sony PSK Modal -->
+    <div class="modal-overlay" id="pskModal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h2>Sony TV Setup</h2>
+            <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin:-8px 0 16px 0;">
+                Enter the Pre-Shared Key from your TV:<br>
+                <span style="font-size:11px;opacity:0.7;">Settings → Network → Home Network → IP Control</span>
+            </p>
+            <label for="pskInput">Pre-Shared Key</label>
+            <input type="text" id="pskInput" placeholder="0000" inputmode="numeric"
+                   maxlength="16" style="letter-spacing:4px;text-align:center;font-size:22px;">
+            <div class="modal-buttons">
+                <button class="btn" id="pskCancelBtn">Skip</button>
+                <button class="btn primary" id="pskConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sleep Timer Modal -->
     <div class="modal-overlay" id="sleepModal" role="dialog" aria-modal="true">
         <div class="modal" style="text-align:center;">
@@ -1242,21 +1555,26 @@
         </div>
 
         <div class="settings-body">
+            <h1 class="settings-large-title">Settings</h1>
 
             <!-- TV Connection -->
             <div class="settings-section">
                 <div class="settings-section-label">TV Connection</div>
                 <div class="settings-card">
                     <div class="settings-row">
-                        <div class="settings-row-icon">📺</div>
+                        <div class="icon-badge" style="background:#007aff;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="15" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title" id="settingsTvName">No TV Connected</div>
                             <div class="settings-row-subtitle" id="settingsTvIp">Tap Change to configure</div>
                         </div>
                         <button class="settings-row-action" onclick="closeSettingsPage(); setTimeout(openTvModal, 360)">Change</button>
                     </div>
-                    <div class="settings-row" style="border-top:1px solid var(--settings-sep);">
-                        <div class="settings-row-icon">🔄</div>
+                    <div class="settings-row">
+                        <div class="icon-badge" style="background:#5856d6;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0-4 4m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title">Brand</div>
                             <div class="settings-row-subtitle" id="settingsBrand">Philips</div>
@@ -1267,10 +1585,53 @@
             </div>
 
             <!-- Saved TVs -->
-            <div class="settings-section" id="savedTvsSection" style="display:none;">
+            <div class="settings-section" id="savedTvsSection">
                 <div class="settings-section-label">Saved TVs</div>
                 <div class="settings-card" id="savedTvsList">
                     <!-- Dynamically populated by renderSavedTvs() -->
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="settings-section">
+                <div class="settings-section-label">Buttons</div>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <div class="icon-badge" style="background:#ff9500;">
+                            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Playback Controls</div>
+                        </div>
+                        <div class="settings-segmented" id="segPlayback">
+                            <button class="seg-btn" onclick="setSection('showPlayback',true)">Show</button>
+                            <button class="seg-btn" onclick="setSection('showPlayback',false)">Hide</button>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="icon-badge" style="background:#ff3b30;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1" fill="currentColor" stroke="none"/><circle cx="17.5" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="7.5" r="1" fill="currentColor" stroke="none"/><circle cx="6.5" cy="12.5" r="1" fill="currentColor" stroke="none"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                        </div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">Color Buttons</div>
+                        </div>
+                        <div class="settings-segmented" id="segColorBtns">
+                            <button class="seg-btn" onclick="setSection('showColorBtns',true)">Show</button>
+                            <button class="seg-btn" onclick="setSection('showColorBtns',false)">Hide</button>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="icon-badge" style="background:#34c759;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        </div>
+                        <div class="settings-row-content">
+                            <div class="settings-row-title">App Launchers</div>
+                        </div>
+                        <div class="settings-segmented" id="segAppLaunchers">
+                            <button class="seg-btn" onclick="setSection('showAppLaunchers',true)">Show</button>
+                            <button class="seg-btn" onclick="setSection('showAppLaunchers',false)">Hide</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1279,7 +1640,9 @@
                 <div class="settings-section-label">Appearance</div>
                 <div class="settings-card">
                     <div class="settings-row">
-                        <div class="settings-row-icon">🎨</div>
+                        <div class="icon-badge" style="background:#5856d6;">
+                            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title">Theme</div>
                         </div>
@@ -1292,48 +1655,27 @@
                 </div>
             </div>
 
-            <!-- Pro -->
-            <div class="settings-section" id="proSection">
-                <div class="settings-section-label">Classic Remote Pro</div>
-                <div class="settings-card">
-                    <div class="settings-row">
-                        <div class="settings-row-icon">✨</div>
-                        <div class="settings-row-content">
-                            <div class="settings-row-title">
-                                Remove Ads
-                                <span class="pro-badge" id="proBadge" style="display:none;">PRO</span>
-                            </div>
-                            <div class="settings-row-subtitle" id="removeAdsSubtitle">One-time purchase</div>
-                        </div>
-                        <button class="settings-row-action primary" id="removeAdsBtn" onclick="purchaseRemoveAds()">Buy</button>
-                    </div>
-                    <div class="settings-row">
-                        <div class="settings-row-icon">🔄</div>
-                        <div class="settings-row-content">
-                            <div class="settings-row-title">Restore Purchase</div>
-                        </div>
-                        <button class="settings-row-action" id="restoreBtn" onclick="restorePurchases()">Restore</button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Support -->
             <div class="settings-section">
                 <div class="settings-section-label">Support</div>
                 <div class="settings-card">
                     <div class="settings-row settings-row-tappable" onclick="leaveReview()">
-                        <div class="settings-row-icon">⭐</div>
+                        <div class="icon-badge" style="background:#ff9500;">
+                            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title">Leave a Review</div>
                         </div>
-                        <div class="settings-row-chevron">›</div>
+                        <div class="settings-row-chevron"><svg viewBox="0 0 6 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4.5L1 10"/></svg></div>
                     </div>
                     <div class="settings-row settings-row-tappable" onclick="reportBug()">
-                        <div class="settings-row-icon">🐛</div>
+                        <div class="icon-badge" style="background:#ff3b30;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.5 2M15.5 4 14 2M9 10a3 3 0 0 1 6 0v4a3 3 0 0 1-6 0v-4zM3 14h2M19 14h2M12 17v4M6 11 4 9M18 11l2-2"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title">Report a Bug</div>
                         </div>
-                        <div class="settings-row-chevron">›</div>
+                        <div class="settings-row-chevron"><svg viewBox="0 0 6 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4.5L1 10"/></svg></div>
                     </div>
                 </div>
             </div>
@@ -1343,25 +1685,22 @@
                 <div class="settings-section-label">About</div>
                 <div class="settings-card">
                     <div class="settings-row">
-                        <div class="settings-row-icon">📱</div>
+                        <div class="icon-badge" style="background:#007aff;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12.01" y2="8" stroke-width="3"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title">Version</div>
                         </div>
-                        <div class="settings-row-value" id="appVersionLabel">1.0.0</div>
-                    </div>
-                    <div class="settings-row">
-                        <div class="settings-row-icon">👤</div>
-                        <div class="settings-row-content">
-                            <div class="settings-row-title">Author</div>
-                        </div>
-                        <div class="settings-row-value">Andrii Chernykh — KULTURA</div>
+                        <div class="settings-row-value" id="appVersionLabel">—</div>
                     </div>
                     <div class="settings-row settings-row-tappable" onclick="openPrivacyPolicy()">
-                        <div class="settings-row-icon">🔒</div>
+                        <div class="icon-badge" style="background:#636366;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
                         <div class="settings-row-content">
                             <div class="settings-row-title">Privacy Policy</div>
                         </div>
-                        <div class="settings-row-chevron">›</div>
+                        <div class="settings-row-chevron"><svg viewBox="0 0 6 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4.5L1 10"/></svg></div>
                     </div>
                 </div>
             </div>
@@ -1405,19 +1744,11 @@
         // ============================================================
 
         const MONETIZATION = {
-            admobBannerId:  'ca-app-pub-2175825252343068/3780951268', // AdMob Banner Unit ID
-            rcApiKeyIos:    'test_tYhjwyNsOGueqEdStQKnwwSpUzw',       // RevenueCat iOS API key (test mode)
-            entitlementId:  'pro',                                    // RevenueCat entitlement name — keep as-is
-            productId:      'remove_ads',                             // App Store Connect IAP product ID — keep as-is
-            appStoreId:     '6761280476',                              // App Store ID
+            admobBannerId:  'ca-app-pub-2175825252343068/3780951268',
+            appStoreId:     '6761280476',
             privacyUrl:     'https://zloi2ff.github.io/classic-remote/',
             bugsUrl:        'https://github.com/zloi2ff/classic-remote/issues/new',
         };
-
-        // adsRemoved: read from localStorage as a UI cache to prevent ad flash on startup.
-        // The real entitlement is always verified via RevenueCat in initRevenueCat()
-        // and localStorage is overwritten with the authoritative server value.
-        let adsRemoved = localStorage.getItem('adsRemoved') === 'true';
 
         // ============================================================
         // XSS HELPERS
@@ -1436,7 +1767,7 @@
         // CAPACITOR HELPERS
         // ============================================================
 
-        const isNative = () => !!(window.Capacitor?.isNativePlatform?.());
+
         const getPlugin = name => window.Capacitor?.Plugins?.[name] ?? null;
 
         function openUrl(url) {
@@ -1450,7 +1781,7 @@
         // ============================================================
 
         async function initAdMob() {
-            if (adsRemoved || !isNative()) return;
+            if (!IS_CAPACITOR) return;
             const AdMob = getPlugin('AdMob');
             if (!AdMob) return;
             try {
@@ -1473,7 +1804,7 @@
         }
 
         async function removeBannerAd() {
-            if (!isNative()) return;
+            if (!IS_CAPACITOR) return;
             const AdMob = getPlugin('AdMob');
             if (!AdMob) return;
             try { await AdMob.removeBanner(); } catch {}
@@ -1482,119 +1813,6 @@
             tvPage.classList.remove('ad-visible');
         }
 
-        // ============================================================
-        // REVENUECAT — In-App Purchase
-        // ============================================================
-
-        async function initRevenueCat() {
-            // RevenueCat disabled until production API key is configured.
-            // Test key (test_...) causes crash in App Store builds.
-            if (MONETIZATION.rcApiKeyIos.startsWith('test_')) return;
-            if (!isNative()) {
-                // Not running as a native app — trust localStorage cache as-is
-                return;
-            }
-            const Purchases = getPlugin('Purchases');
-            if (!Purchases) return;
-            try {
-                await Purchases.configure({ apiKey: MONETIZATION.rcApiKeyIos });
-                const { customerInfo } = await Purchases.getCustomerInfo();
-                // Always overwrite localStorage with the authoritative entitlement
-                // value from RevenueCat. This prevents a bypassed localStorage flag
-                // from permanently hiding ads without a valid purchase.
-                const hasPro = checkEntitlement(customerInfo);
-                setAdsRemoved(hasPro, !hasPro); // remove banner only when revoking
-            } catch (e) {
-                console.warn('RevenueCat init:', e);
-                // RevenueCat unavailable — keep localStorage value as fallback
-            }
-        }
-
-        function checkEntitlement(customerInfo) {
-            return !!customerInfo?.entitlements?.active?.[MONETIZATION.entitlementId];
-        }
-
-        function setAdsRemoved(value, removeBanner = true) {
-            adsRemoved = value;
-            localStorage.setItem('adsRemoved', value ? 'true' : 'false');
-            if (value && removeBanner) removeBannerAd();
-            syncProUI();
-        }
-
-        function syncProUI() {
-            const proSection = document.getElementById('proSection');
-            if (proSection && (!isNative() || MONETIZATION.rcApiKeyIos.startsWith('test_'))) { proSection.style.display = 'none'; return; }
-            const btn      = document.getElementById('removeAdsBtn');
-            const badge    = document.getElementById('proBadge');
-            const subtitle = document.getElementById('removeAdsSubtitle');
-            const restore  = document.getElementById('restoreBtn');
-
-            if (adsRemoved) {
-                if (btn)      { btn.textContent = 'Active'; btn.disabled = true; btn.style.opacity = '0.5'; }
-                if (badge)    badge.style.display = 'inline-block';
-                if (subtitle) subtitle.textContent = 'Ads are removed — thank you!';
-                if (restore)  { restore.style.opacity = '0.4'; restore.disabled = true; }
-            } else {
-                if (btn)      { btn.textContent = 'Buy'; btn.disabled = false; btn.style.opacity = ''; }
-                if (badge)    badge.style.display = 'none';
-                if (subtitle) subtitle.textContent = 'One-time purchase';
-                if (restore)  { restore.style.opacity = ''; restore.disabled = false; }
-            }
-        }
-
-        async function purchaseRemoveAds() {
-            if (!isNative()) { alert('In-App Purchase is only available in the iOS app.'); return; }
-            const Purchases = getPlugin('Purchases');
-            if (!Purchases) { alert('Purchases plugin not available.'); return; }
-
-            const btn = document.getElementById('removeAdsBtn');
-            btn.innerHTML = '<span class="spinner"></span>';
-            btn.disabled = true;
-
-            try {
-                const offerings = await Purchases.getOfferings();
-                const pkg = offerings?.current?.availablePackages?.find(
-                    p => p.storeProduct?.productIdentifier === MONETIZATION.productId
-                );
-                if (!pkg) { alert('Product not available. Try again later.'); return; }
-
-                const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg });
-                if (checkEntitlement(customerInfo)) {
-                    setAdsRemoved(true);
-                    haptic();
-                    alert('Ads removed! Thank you for your support ❤️');
-                } else { alert('Purchase completed but activation failed. Please tap Restore or contact support.'); }
-            } catch (e) {
-                if (e?.code !== 'PURCHASE_CANCELLED') alert('Purchase failed. Please try again.');
-            } finally {
-                syncProUI();
-            }
-        }
-
-        async function restorePurchases() {
-            if (!isNative()) return;
-            const Purchases = getPlugin('Purchases');
-            if (!Purchases) return;
-
-            const btn = document.getElementById('restoreBtn');
-            btn.textContent = '...';
-            btn.disabled = true;
-
-            try {
-                const { customerInfo } = await Purchases.restorePurchases();
-                if (checkEntitlement(customerInfo)) {
-                    setAdsRemoved(true);
-                    alert('Purchase restored successfully!');
-                } else {
-                    alert('No previous purchase found.');
-                }
-            } catch {
-                alert('Restore failed. Please try again.');
-            } finally {
-                btn.textContent = 'Restore';
-                btn.disabled = false;
-            }
-        }
 
         // ============================================================
         // SETTINGS PAGE
@@ -1612,24 +1830,45 @@
             document.getElementById('settingsBrand').textContent =
                 brandInfo ? brandInfo.name : 'Not set';
 
-            try {
-                const App = getPlugin('App');
-                const info = App ? await App.getInfo() : null;
-                const ver = info?.version || '1.0.0';
-                const build = info?.build || '';
-                document.getElementById('appVersionLabel').textContent = build ? `${ver} (${build})` : ver;
-            } catch {}
 
             syncThemeSegmented();
-            syncProUI();
+            syncButtonToggles();
             renderSavedTvs();
+            // Populate version
+            try {
+                const App = getPlugin('App');
+                if (App) {
+                    const info = await App.getInfo();
+                    const el = document.getElementById('appVersionLabel');
+                    if (el && info?.version) el.textContent = info.version + (info.build ? ` (${info.build})` : '');
+                }
+            } catch {}
             document.getElementById('settingsPage').classList.add('active');
         }
+
+        function addAnotherTv() {
+            updateProfileOnConnect(); // save current TV before switching
+            changeBrand();
+        }
+
+        // Saved config for restoring if user cancels brand change
+        let _prevBrandConfig = null;
 
         function changeBrand() {
             closeSettingsPage();
             driverDisconnect();
             stopPolling();
+
+            // Save current config so user can go back without selecting a new TV
+            const prevIp = localStorage.getItem('tvIp');
+            _prevBrandConfig = prevIp ? {
+                ip: prevIp,
+                port: parseInt(localStorage.getItem('tvPort')) || 1925,
+                apiVersion: parseInt(localStorage.getItem('tvApiVersion')) || 1,
+                brand: localStorage.getItem('tvBrand') || 'philips',
+                name: localStorage.getItem('tvName') || 'TV',
+            } : null;
+
             localStorage.removeItem('tvBrand');
             localStorage.removeItem('tvIp');
             localStorage.removeItem('tvPort');
@@ -1640,12 +1879,57 @@
                 try { window.webkit.messageHandlers.tvConfig.postMessage({ip:'',port:0,apiVersion:0,brand:''}); } catch {}
             }
             setTimeout(() => {
+                document.getElementById('brandScanList').innerHTML = '';
                 document.getElementById('brandSelectScreen').classList.add('active');
+                prefillBrandScreenProfiles();
+                const backBtn = document.getElementById('brandBackBtn');
+                if (backBtn) backBtn.style.display = _prevBrandConfig ? '' : 'none';
             }, 360);
+        }
+
+        function cancelBrandChange() {
+            const cfg = _prevBrandConfig;
+            _prevBrandConfig = null;
+            document.getElementById('brandBackBtn').style.display = 'none';
+            if (!cfg) {
+                document.getElementById('brandSelectScreen').classList.remove('active');
+                return;
+            }
+            localStorage.setItem('tvBrand', cfg.brand);
+            const closeUi = () => document.getElementById('brandSelectScreen').classList.remove('active');
+            _connectTv(cfg.ip, cfg.port, cfg.apiVersion, cfg.name, closeUi);
         }
 
         function closeSettingsPage() {
             document.getElementById('settingsPage').classList.remove('active');
+        }
+
+        // ============================================================
+        //  BUTTON VISIBILITY TOGGLES
+        // ============================================================
+
+        const BUTTON_SECTIONS = [
+            { key: 'showPlayback',     elementId: 'playbackSection',     segId: 'segPlayback'     },
+            { key: 'showColorBtns',    elementId: 'colorBtnsSection',    segId: 'segColorBtns'    },
+            { key: 'showAppLaunchers', elementId: 'appLaunchersSection', segId: 'segAppLaunchers' },
+        ];
+
+        function syncButtonToggles() {
+            BUTTON_SECTIONS.forEach(({ key, elementId, segId }) => {
+                const visible = localStorage.getItem(key) !== 'hidden';
+                const el  = document.getElementById(elementId);
+                const seg = document.getElementById(segId);
+                if (el) el.style.display = visible ? '' : 'none';
+                if (seg) {
+                    seg.children[0].classList.toggle('active',  visible);
+                    seg.children[1].classList.toggle('active', !visible);
+                }
+            });
+        }
+
+        function setSection(key, visible) {
+            localStorage.setItem(key, visible ? 'shown' : 'hidden');
+            syncButtonToggles();
         }
 
         // ============================================================
@@ -1690,11 +1974,16 @@
             const p = profiles[index];
             if (!p) return;
             const currentIp = localStorage.getItem('tvIp');
-            if (currentIp === p.ip) { closeSettingsPage(); return; }
+            // If it's the active TV and no brand screen is open — just close settings
+            const brandScreenOpen = document.getElementById('brandSelectScreen').classList.contains('active');
+            if (currentIp === p.ip && !brandScreenOpen) { closeSettingsPage(); return; }
             driverDisconnect();
             stopPolling();
+            _prevBrandConfig = null;
             localStorage.setItem('tvBrand', p.brand);
             closeSettingsPage();
+            document.getElementById('brandSelectScreen').classList.remove('active');
+            document.getElementById('brandBackBtn').style.display = 'none';
             await new Promise(r => setTimeout(r, 360));
             await _connectTv(p.ip, p.port, p.apiVersion, p.name, () => {});
         }
@@ -1719,18 +2008,17 @@
             const list     = document.getElementById('savedTvsList');
             if (!list) return;
 
-            if (profiles.length === 0) { section.style.display = 'none'; return; }
             section.style.display = '';
 
             const activeIp = localStorage.getItem('tvIp');
-            list.innerHTML = profiles.map((p, i) => {
+            const chevronSvg = `<svg viewBox="0 0 6 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4.5L1 10"/></svg>`;
+            const profileRows = profiles.map((p, i) => {
                 const isActive  = p.ip === activeIp;
                 const icon      = BRAND_ICONS[p.brand] || '📺';
                 const brandName = (BRANDS[p.brand]?.name) || p.brand;
                 const subtitle  = escHtml(`${p.ip} \u00b7 ${brandName}`);
-                const sep       = i > 0 ? ' style="border-top:1px solid var(--settings-sep);"' : '';
                 const titleStyle = isActive ? ' style="color:var(--accent);"' : '';
-                return `<div class="settings-row settings-row-tappable"${sep} onclick="switchToProfile(${i})">` +
+                return `<div class="settings-row settings-row-tappable" onclick="switchToProfile(${i})">` +
                     `<div class="settings-row-icon">${icon}</div>` +
                     `<div class="settings-row-content">` +
                         `<div class="settings-row-title"${titleStyle}>${escHtml(p.name)}</div>` +
@@ -1740,6 +2028,55 @@
                     `<button class="settings-row-action" onclick="event.stopPropagation();deleteProfile(${i})" style="color:var(--danger);">Delete</button>` +
                     `</div>`;
             }).join('');
+
+            const addRow = `<div class="settings-row settings-row-tappable" onclick="addAnotherTv()">` +
+                `<div class="settings-row-icon">➕</div>` +
+                `<div class="settings-row-content">` +
+                    `<div class="settings-row-title">Add another TV</div>` +
+                `</div>` +
+                `<div class="settings-row-chevron">${chevronSvg}</div>` +
+                `</div>`;
+
+            list.innerHTML = profileRows + addRow;
+        }
+
+        // ============================================================
+        //  BRAND SCREEN — PREVIOUSLY CONNECTED PROFILES
+        // ============================================================
+
+        function connectProfileFromBrandScreen(index) {
+            const profiles = getProfiles();
+            const p = profiles[index];
+            if (!p) return;
+            localStorage.setItem('tvBrand', p.brand);
+            const closeUi = () => document.getElementById('brandSelectScreen').classList.remove('active');
+            _connectTv(p.ip, p.port, p.apiVersion, p.name, closeUi);
+        }
+
+        function prefillBrandScreenProfiles() {
+            const profiles = getProfiles();
+            if (profiles.length === 0) return;
+
+            const list = document.getElementById('brandScanList');
+            if (!list) return;
+
+            const items = profiles.map((p, i) => {
+                const brandName = (BRANDS[p.brand]?.name) || p.brand;
+                return `<div class="tv-item" onclick="connectProfileFromBrandScreen(${i})">` +
+                    `<div class="tv-item-info">` +
+                        `<div class="tv-item-name">${escHtml(p.name || 'TV')} <span class="brand-badge">${escHtml(brandName)}</span></div>` +
+                        `<div class="tv-item-ip">${escHtml(p.ip)}:${escHtml(String(p.port))}</div>` +
+                    `</div>` +
+                    `<div class="tv-item-check">✓</div>` +
+                    `</div>`;
+            }).join('');
+
+            list.insertAdjacentHTML('beforeend', `
+                <div style="width:100%;max-width:340px;">
+                    <p style="margin:0 0 8px 0;font-size:12px;color:var(--text-secondary);text-align:left;">Previously connected</p>
+                    ${items}
+                </div>
+            `);
         }
 
         // Swipe-right to close settings page
@@ -2711,6 +3048,7 @@
         // ============================================================
 
         async function driverSendKey(universalKey) {
+            haptic();
             const brand = getBrand();
             const mapped = KEY_MAPS[brand]?.[universalKey] ?? universalKey;
             if (mapped === '') return false; // unsupported key for this brand
@@ -2740,6 +3078,7 @@
         }
 
         async function driverSetVolume(level) {
+            haptic();
             switch (getBrand()) {
                 case 'philips': return await _philipsSetVolume(level);
                 case 'lg':      return await _lgSetVolume(level);
@@ -3018,6 +3357,7 @@
 
         // Connect to a TV, triggering pairing if needed.
         async function _connectTv(ip, port, apiVersion, name, closeUiFn) {
+            _prevBrandConfig = null; // new TV selected — no going back to old one
             const brand = getBrand();
             const brandInfo = BRANDS[brand];
 
@@ -3041,10 +3381,9 @@
             document.getElementById('tvTitle').textContent = (name || brandInfo?.name || 'TV').toUpperCase();
             closeUiFn();
 
-            // Sony PSK prompt
+            // Sony PSK modal
             if (brand === 'sony' && !localStorage.getItem('tvPsk_' + ip)) {
-                const psk = prompt('Enter Sony TV Pre-Shared Key (set in TV Settings > Network > IP Control):', '0000');
-                if (psk) localStorage.setItem('tvPsk_' + ip, psk);
+                await showPskModal(ip);
             }
 
             updateProfileOnConnect();
@@ -3065,6 +3404,7 @@
                     showStatus('connected', 'Connected');
                     startPolling();
                     renderExtraButtons(); renderAppLaunchers();
+                    syncButtonToggles();
                     return;
                 } catch (e) {
                     showStatus('error', e.message || 'Connection failed');
@@ -3083,6 +3423,7 @@
                     showStatus('connected', 'Connected');
                     startPolling();
                     renderExtraButtons(); renderAppLaunchers();
+                    syncButtonToggles();
                     if (brand === 'philips') loadTvCapabilities();
                     return;
                 }
@@ -3091,10 +3432,31 @@
                     showStatus('connected', 'Connected');
                     startPolling();
                     renderExtraButtons(); renderAppLaunchers();
+                    syncButtonToggles();
                     return;
                 }
-                if (++attempts < 5) setTimeout(tryConnect, 2000);
-                else { showStatus('error', 'Offline'); startPolling(); renderExtraButtons(); renderAppLaunchers(); }
+                if (++attempts < 5) { setTimeout(tryConnect, 2000); return; }
+                // All retries exhausted — check if Philips v6 auth is stale
+                if (IS_CAPACITOR && brand === 'philips') {
+                    const tvIp   = localStorage.getItem('tvIp');
+                    const tvPort = localStorage.getItem('tvPort') || '1925';
+                    const apiV   = parseInt(localStorage.getItem('tvApiVersion') || '1');
+                    if (apiV >= 6 && tvIp) {
+                        try {
+                            const probe = await fetch(`https://${tvIp}:${tvPort}/${apiV}/system`, { credentials: 'omit' });
+                            if (probe.status === 401) {
+                                // TV online but credentials rejected — clear and re-pair
+                                localStorage.removeItem(`tvAuth_${tvIp}`);
+                                await startPairing(tvIp, parseInt(tvPort), async () => {
+                                    updateProfileOnConnect();
+                                    await _postConnectLoad();
+                                });
+                                return;
+                            }
+                        } catch { /* TV unreachable — fall through to Offline */ }
+                    }
+                }
+                showStatus('error', 'Offline'); startPolling(); renderExtraButtons(); renderAppLaunchers(); syncButtonToggles();
             };
             tryConnect();
         }
@@ -3213,7 +3575,7 @@
             const supported = Object.entries(APP_LAUNCHERS).filter(([, app]) => app.brands[brandKey]);
             if (supported.length === 0) { section.style.display = 'none'; return; }
 
-            section.style.display = '';
+            section.style.display = localStorage.getItem('showAppLaunchers') === 'hidden' ? 'none' : '';
             grid.innerHTML = supported.map(([key, app]) =>
                 `<button class="btn app-launcher-btn" data-app="${escHtml(key)}" aria-label="Launch ${escHtml(app.label)}">` +
                 `<span class="app-icon">${app.icon}</span>` +
@@ -3246,7 +3608,10 @@
             if (!ip) return;
             const octets = ip.split('.');
             if (octets.length !== 4 || !octets.every(o => /^\d{1,3}$/.test(o) && +o <= 255)) {
-                alert('Please enter a valid IP address (e.g. 192.168.1.100)');
+                const input = document.getElementById(inputId);
+                input.style.borderColor = 'var(--danger)';
+                input.placeholder = 'e.g. 192.168.1.100';
+                setTimeout(() => { input.style.borderColor = ''; }, 2000);
                 return;
             }
 
@@ -3259,7 +3624,9 @@
                 } catch {}
             }
             const port       = detected?.port       || BRANDS[brand]?.port || 1925;
-            const apiVersion = detected?.apiVersion || 1;
+            // Philips on Capacitor: if probe failed (likely self-signed cert rejection on HTTPS),
+            // default to v6 so modern Android TVs get pairing instead of v1 HTTP → 400.
+            const apiVersion = detected?.apiVersion || (IS_CAPACITOR && brand === 'philips' ? 6 : 1);
             const name       = detected?.name       || (BRANDS[brand]?.name || '') + ' TV';
 
             const closeUi = () => {
@@ -3382,6 +3749,32 @@
         }
         function closePowerModal() {
             document.getElementById('powerModal').classList.remove('active');
+        }
+
+        // Sony PSK modal — returns Promise that resolves when user confirms or skips
+        function showPskModal(ip) {
+            return new Promise(resolve => {
+                const modal   = document.getElementById('pskModal');
+                const input   = document.getElementById('pskInput');
+                const confirm = document.getElementById('pskConfirmBtn');
+                const cancel  = document.getElementById('pskCancelBtn');
+                input.value = '';
+                modal.classList.add('active');
+                setTimeout(() => input.focus(), 300);
+
+                function finish() {
+                    const val = input.value.trim().replace(/[\r\n]/g, '');
+                    if (val) localStorage.setItem('tvPsk_' + ip, val);
+                    modal.classList.remove('active');
+                    confirm.removeEventListener('click', onConfirm);
+                    cancel.removeEventListener('click', onCancel);
+                    resolve();
+                }
+                function onConfirm() { finish(); }
+                function onCancel()  { localStorage.setItem('tvPsk_' + ip, '0000'); modal.classList.remove('active'); confirm.removeEventListener('click', onConfirm); cancel.removeEventListener('click', onCancel); resolve(); }
+                confirm.addEventListener('click', onConfirm);
+                cancel.addEventListener('click', onCancel);
+            });
         }
 
         // Sleep Timer
@@ -3623,6 +4016,8 @@
             localStorage.removeItem('tvBrand');
             document.getElementById('setupScreen').classList.remove('active');
             document.getElementById('brandSelectScreen').classList.add('active');
+            const backBtn = document.getElementById('brandBackBtn');
+            if (backBtn) backBtn.style.display = _prevBrandConfig ? '' : 'none';
         }
 
         function selectBrand(brand) {
@@ -3684,13 +4079,16 @@
             if (!ip) return;
             const octets = ip.split('.');
             if (octets.length !== 4 || !octets.every(o => /^\d{1,3}$/.test(o) && +o <= 255)) {
-                alert('Please enter a valid IP address');
+                const input = document.getElementById('brandIpInput');
+                input.style.borderColor = 'var(--danger)';
+                input.placeholder = 'e.g. 192.168.1.100';
+                setTimeout(() => { input.style.borderColor = ''; }, 2000);
                 return;
             }
             localStorage.setItem('tvBrand', brand);
             const detected = await driverProbe(ip, brand);
             const port = detected?.port || BRANDS[brand]?.port || 1925;
-            const apiVersion = detected?.apiVersion || 1;
+            const apiVersion = detected?.apiVersion || (IS_CAPACITOR && brand === 'philips' ? 6 : 1);
             const name = detected?.name || BRANDS[brand]?.name + ' TV';
             const closeUi = () => document.getElementById('brandSelectScreen').classList.remove('active');
             await _connectTv(ip, port, apiVersion, name, closeUi);
@@ -3714,15 +4112,14 @@
 
                 await Promise.all([
                     (getBrand() === 'philips' ? loadTvCapabilities() : Promise.resolve()),
-                    initRevenueCat(),
+                    initAdMob(),
                 ]);
-
-                if (!adsRemoved) await initAdMob();
 
                 // WebSocket brands need explicit connection
                 await driverConnect();
                 startPolling();
                 renderExtraButtons(); renderAppLaunchers();
+                syncButtonToggles();
             } else if (config?.ip && !brand) {
                 // Legacy: had Philips config but no brand set
                 localStorage.setItem('tvBrand', 'philips');
@@ -3730,14 +4127,14 @@
                 await saveConfig(config.ip, parseInt(config.port) || 1925, parseInt(config.apiVersion) || 1);
                 const name = localStorage.getItem('tvName');
                 if (name) document.getElementById('tvTitle').textContent = name.toUpperCase();
-                await Promise.all([loadTvCapabilities(), initRevenueCat()]);
-                if (!adsRemoved) await initAdMob();
+                await Promise.all([loadTvCapabilities(), initAdMob()]);
                 startPolling();
                 renderExtraButtons(); renderAppLaunchers();
+                syncButtonToggles();
             } else {
                 // No TV configured — show brand selection
                 document.getElementById('brandSelectScreen').classList.add('active');
-                await initRevenueCat();
+                prefillBrandScreenProfiles();
             }
           } catch (e) {
             console.error('[init] Fatal:', e);

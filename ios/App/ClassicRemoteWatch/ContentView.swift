@@ -4,14 +4,40 @@ import WatchKit
 // MARK: - Design Tokens
 
 private enum WatchDesign {
-    static let volUpColor   = Color(red: 0.18, green: 0.72, blue: 0.45)  // green
-    static let volDownColor = Color(red: 0.18, green: 0.72, blue: 0.45)  // green
-    static let muteColor    = Color(red: 0.98, green: 0.62, blue: 0.11)  // amber
-    static let powerColor   = Color(red: 0.86, green: 0.22, blue: 0.18)  // red
+    static let volUpColor   = Color(red: 0.18, green: 0.72, blue: 0.45)
+    static let volDownColor = Color(red: 0.18, green: 0.72, blue: 0.45)
+    static let muteColor    = Color(red: 0.98, green: 0.62, blue: 0.11)
+    static let powerColor   = Color(red: 0.86, green: 0.22, blue: 0.18)
     static let cornerRadius: CGFloat = 14
+
+    // Gradient mesh — same palette as iOS app
+    static let bgBase   = Color(red: 0.047, green: 0.043, blue: 0.078)
+    static let bgPurple = Color(red: 0.345, green: 0.220, blue: 0.839)
+    static let bgBlue   = Color(red: 0.000, green: 0.392, blue: 1.000)
+    static let bgGreen  = Color(red: 0.157, green: 0.706, blue: 0.314)
+    static let bgPink   = Color(red: 0.784, green: 0.235, blue: 0.706)
 }
 
-// MARK: - Remote Button
+// MARK: - Liquid Glass Background
+
+private struct LiquidGlassBackground: View {
+    var body: some View {
+        ZStack {
+            WatchDesign.bgBase
+            RadialGradient(colors: [WatchDesign.bgPurple.opacity(0.65), .clear],
+                           center: UnitPoint(x: 0.15, y: 0.18), startRadius: 0, endRadius: 90)
+            RadialGradient(colors: [WatchDesign.bgBlue.opacity(0.50), .clear],
+                           center: UnitPoint(x: 0.85, y: 0.62), startRadius: 0, endRadius: 90)
+            RadialGradient(colors: [WatchDesign.bgGreen.opacity(0.32), .clear],
+                           center: UnitPoint(x: 0.45, y: 0.90), startRadius: 0, endRadius: 75)
+            RadialGradient(colors: [WatchDesign.bgPink.opacity(0.26), .clear],
+                           center: UnitPoint(x: 0.72, y: 0.14), startRadius: 0, endRadius: 65)
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - Remote Button (Liquid Glass)
 
 private struct RemoteButton: View {
     let icon: String
@@ -23,7 +49,7 @@ private struct RemoteButton: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 30, weight: .semibold))
                     .foregroundStyle(accentColor)
                 Text(label)
                     .font(.system(size: 10, weight: .medium))
@@ -32,10 +58,24 @@ private struct RemoteButton: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(.plain)
-        .background(
+        .background {
             RoundedRectangle(cornerRadius: WatchDesign.cornerRadius)
-                .fill(Color.white.opacity(0.07))
-        )
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    // Border
+                    RoundedRectangle(cornerRadius: WatchDesign.cornerRadius)
+                        .strokeBorder(Color.white.opacity(0.18), lineWidth: 0.5)
+                }
+                .overlay {
+                    // Specular highlight at top edge
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.24), Color.clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: WatchDesign.cornerRadius))
+                }
+        }
     }
 }
 
@@ -117,13 +157,25 @@ struct ContentView: View {
     @StateObject private var controller = TvController()
 
     var body: some View {
-        Group {
-            if controller.config == nil {
-                NotConfiguredView()
-            } else if let cfg = controller.config, cfg.isWebSocketOnly {
-                WebSocketBrandView(brandName: cfg.displayBrand)
-            } else {
-                remoteView
+        ZStack {
+            LiquidGlassBackground()
+
+            Group {
+                if controller.config == nil {
+                    NotConfiguredView()
+                } else if let cfg = controller.config, cfg.isWebSocketOnly {
+                    WebSocketBrandView(brandName: cfg.displayBrand)
+                } else {
+                    TabView {
+                        remoteView
+                            .tag(0)
+                        navigationView
+                            .tag(1)
+                    }
+                    .tabViewStyle(.page)
+                    .toolbar(.hidden)
+                    .persistentSystemOverlays(.hidden)
+                }
             }
         }
         .onAppear {
@@ -138,76 +190,82 @@ struct ContentView: View {
 
     private var remoteView: some View {
         GeometryReader { geo in
-            VStack(spacing: 6) {
-                // Brand label
-                HStack(spacing: 4) {
-                    Image(systemName: "tv")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(.tertiary)
-                    Text((controller.config?.displayBrand ?? "").uppercased())
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                        .tracking(1.5)
-                }
-
-                // Status area — fixed height to prevent layout jumps
-                ZStack {
-                    Color.clear
-                    StatusOverlay(
-                        isSending: controller.isSending,
-                        lastSuccess: controller.lastSuccess,
-                        lastError: controller.lastError
-                    )
-                }
-                .frame(height: 22)
-
-                // 2x2 button grid
-                let buttonSize = (geo.size.width - 14) / 2  // 6px gap + 2*4px padding
-
+            let cell = (min(geo.size.width, geo.size.height) - 6) / 2
+            ZStack(alignment: .top) {
                 VStack(spacing: 6) {
                     HStack(spacing: 6) {
-                        RemoteButton(
-                            icon: "speaker.plus.fill",
-                            label: "VOL +",
-                            accentColor: WatchDesign.volUpColor
-                        ) {
-                            controller.send("VolumeUp")
-                        }
-                        .frame(width: buttonSize, height: buttonSize)
-
-                        RemoteButton(
-                            icon: "speaker.minus.fill",
-                            label: "VOL -",
-                            accentColor: WatchDesign.volDownColor
-                        ) {
-                            controller.send("VolumeDown")
-                        }
-                        .frame(width: buttonSize, height: buttonSize)
+                        RemoteButton(icon: "speaker.plus.fill",  label: "VOL +", accentColor: WatchDesign.volUpColor)   { controller.send("VolumeUp") }
+                            .frame(width: cell, height: cell)
+                        RemoteButton(icon: "speaker.minus.fill", label: "VOL -", accentColor: WatchDesign.volDownColor) { controller.send("VolumeDown") }
+                            .frame(width: cell, height: cell)
                     }
-
                     HStack(spacing: 6) {
-                        RemoteButton(
-                            icon: "speaker.slash.fill",
-                            label: "MUTE",
-                            accentColor: WatchDesign.muteColor
-                        ) {
-                            controller.send("Mute")
-                        }
-                        .frame(width: buttonSize, height: buttonSize)
-
-                        RemoteButton(
-                            icon: "power",
-                            label: "POWER",
-                            accentColor: WatchDesign.powerColor
-                        ) {
-                            controller.send("Standby")
-                        }
-                        .frame(width: buttonSize, height: buttonSize)
+                        RemoteButton(icon: "speaker.slash.fill", label: "MUTE",  accentColor: WatchDesign.muteColor)  { controller.send("Mute") }
+                            .frame(width: cell, height: cell)
+                        RemoteButton(icon: "power",              label: "POWER", accentColor: WatchDesign.powerColor) { controller.send("Standby") }
+                            .frame(width: cell, height: cell)
                     }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
+                StatusOverlay(
+                    isSending: controller.isSending,
+                    lastSuccess: controller.lastSuccess,
+                    lastError: controller.lastError
+                )
+                .frame(height: 16)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 2)
+    }
+
+    // MARK: Navigation Pad
+
+    private var navigationView: some View {
+        GeometryReader { geo in
+            let cell = (geo.size.width - 14) / 3
+
+            VStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    Color.clear.frame(width: cell, height: cell)
+                    RemoteButton(icon: "chevron.up", label: "UP", accentColor: Color.white.opacity(0.7)) {
+                        controller.send("Up")
+                    }
+                    .frame(width: cell, height: cell)
+                    Color.clear.frame(width: cell, height: cell)
+                }
+
+                HStack(spacing: 6) {
+                    RemoteButton(icon: "chevron.left", label: "LEFT", accentColor: Color.white.opacity(0.7)) {
+                        controller.send("Left")
+                    }
+                    .frame(width: cell, height: cell)
+
+                    RemoteButton(icon: "checkmark", label: "OK", accentColor: Color.blue) {
+                        controller.send("Ok")
+                    }
+                    .frame(width: cell, height: cell)
+
+                    RemoteButton(icon: "chevron.right", label: "RIGHT", accentColor: Color.white.opacity(0.7)) {
+                        controller.send("Right")
+                    }
+                    .frame(width: cell, height: cell)
+                }
+
+                HStack(spacing: 6) {
+                    Color.clear.frame(width: cell, height: cell)
+                    RemoteButton(icon: "chevron.down", label: "DOWN", accentColor: Color.white.opacity(0.7)) {
+                        controller.send("Down")
+                    }
+                    .frame(width: cell, height: cell)
+                    Color.clear.frame(width: cell, height: cell)
                 }
             }
             .padding(.horizontal, 4)
             .padding(.vertical, 2)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
         }
     }
 }
@@ -219,9 +277,15 @@ struct ContentView: View {
 }
 
 #Preview("Not Configured") {
-    NotConfiguredView()
+    ZStack {
+        LiquidGlassBackground()
+        NotConfiguredView()
+    }
 }
 
 #Preview("Samsung (unsupported)") {
-    WebSocketBrandView(brandName: "Samsung")
+    ZStack {
+        LiquidGlassBackground()
+        WebSocketBrandView(brandName: "Samsung")
+    }
 }
