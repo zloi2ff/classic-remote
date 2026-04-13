@@ -98,10 +98,6 @@ _SECURITY_HEADERS = [
                                 "style-src 'unsafe-inline'; connect-src *; img-src 'self' data:"),
 ]
 
-# Shared SSL context (thread-safe, reused across all HTTPS requests)
-_SHARED_SSL_CTX = _ssl_context()
-
-
 def is_valid_tv_ip(ip: str) -> bool:
     """Return True only if ip is a valid RFC-1918 private unicast address.
 
@@ -128,6 +124,10 @@ def _ssl_context() -> ssl.SSLContext:
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     return ctx
+
+
+# Shared SSL context (thread-safe, reused across all HTTPS requests)
+_SHARED_SSL_CTX = _ssl_context()
 
 
 def get_local_subnet() -> tuple[str | None, str | None]:

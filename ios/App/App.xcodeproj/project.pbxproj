@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		645545C7397E8C129C3966B1 /* ClassicRemoteWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BF331467CC69624BF23112AE /* ClassicRemoteWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		07FF285283431CF0D4376AF5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63C7D38029ABD3EEE54471BD /* Assets.xcassets */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		478D83703708C10888874E13 /* ClassicRemoteWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95645BD88E8126690518CE4B /* ClassicRemoteWatchApp.swift */; };
@@ -18,7 +17,7 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
-
+		645545C7397E8C129C3966B1 /* ClassicRemoteWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BF331467CC69624BF23112AE /* ClassicRemoteWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7129D0134357C7FA770F83CA /* TvController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 612F5A7162709680C0E9E25E /* TvController.swift */; };
 		7A1EA40E0B58C475425BD6DE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A2A9010FA88BF71096391B /* ContentView.swift */; };
 		A87F0C80F9C643CB9925ACF7 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F979B2C8EDC82BAD9A48202 /* Foundation.framework */; };
@@ -49,7 +48,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-
 		5EFB66ADDADE2C6835810C1F /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -91,14 +89,14 @@
 		95645BD88E8126690518CE4B /* ClassicRemoteWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClassicRemoteWatchApp.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		99CCEE52AB3B755887C60990 /* ClassicRemoteWatch.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = ClassicRemoteWatch.entitlements; sourceTree = "<group>"; };
-		AA000021000000000000WR00 /* WatchSessionReceiver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSessionReceiver.swift; sourceTree = "<group>"; };
 		AA000001000000000000AA00 /* TvConfigHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvConfigHandler.swift; sourceTree = "<group>"; };
-		AA000020000000000000WS00 /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
 		AA000002000000000000BB00 /* PhilipsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhilipsWidget.swift; sourceTree = "<group>"; };
 		AA000003000000000000CC00 /* TvControlIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvControlIntent.swift; sourceTree = "<group>"; };
 		AA000004000000000000DD00 /* PhilipsWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PhilipsWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA000008000000000000GG00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA000011000000000000PP00 /* TvConfigPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvConfigPlugin.swift; sourceTree = "<group>"; };
+		AA000020000000000000WS00 /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
+		AA000021000000000000WR00 /* WatchSessionReceiver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSessionReceiver.swift; sourceTree = "<group>"; };
 		BF331467CC69624BF23112AE /* ClassicRemoteWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClassicRemoteWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9A2A9010FA88BF71096391B /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -420,10 +418,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = ClassicRemoteWatch/ClassicRemoteWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ClassicRemoteWatch/Info.plist;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote.watchapp;
 				PRODUCT_NAME = ClassicRemoteWatch;
 				SDKROOT = watchos;
@@ -564,7 +562,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -572,7 +570,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -588,7 +586,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -596,7 +594,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
@@ -610,7 +608,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PhilipsWidgetExtension/PhilipsWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				INFOPLIST_FILE = PhilipsWidgetExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -618,7 +616,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote.widget;
 				PRODUCT_NAME = PhilipsWidgetExtension;
 				SKIP_INSTALL = YES;
@@ -632,7 +630,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PhilipsWidgetExtension/PhilipsWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				INFOPLIST_FILE = PhilipsWidgetExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -640,7 +638,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote.widget;
 				PRODUCT_NAME = PhilipsWidgetExtension;
 				SKIP_INSTALL = YES;
@@ -656,11 +654,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = ClassicRemoteWatch/ClassicRemoteWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = C2TP8275T7;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ClassicRemoteWatch/Info.plist;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.philips.remote.watchapp;
 				PRODUCT_NAME = ClassicRemoteWatch;
 				SDKROOT = watchos;
